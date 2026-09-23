@@ -78,9 +78,9 @@ function ScaledIcon({ src, size }: { src: string; size: 32 | 36 }) {
 }
 
 function DenikyIcon() {
-  const scale = 32 / 44;
+  const scale = 36 / 44;
   return (
-    <span className="relative h-8 w-8 overflow-hidden">
+    <span className="relative size-9 overflow-hidden">
       <img
         src="/assets/icon-deniky.svg"
         alt=""
@@ -158,29 +158,29 @@ const services: Service[] = [
   {
     id: "slovnik",
     label: "Slovník",
-    renderIcon: () => <ScaledIcon src="/assets/icon-slovnik.svg" size={32} />,
+    renderIcon: () => <ScaledIcon src="/assets/icon-slovnik.svg" size={36} />,
   },
   {
     id: "reality",
     label: "Reality",
-    renderIcon: () => <ScaledIcon src="/assets/icon-reality.svg" size={32} />,
+    renderIcon: () => <ScaledIcon src="/assets/icon-reality.svg" size={36} />,
   },
   {
     id: "letaky",
     label: "Letáky",
-    renderIcon: () => <ScaledIcon src="/assets/icon-kupi.svg" size={32} />,
+    renderIcon: () => <ScaledIcon src="/assets/icon-kupi.svg" size={36} />,
   },
   {
     id: "apps",
     label: "Mobilní aplikace",
     renderIcon: () => (
-      <ScaledIcon src="/assets/icon-tvprogram-v2.svg" size={32} />
+      <ScaledIcon src="/assets/icon-tvprogram-v2.svg" size={36} />
     ),
   },
   {
     id: "recepty",
     label: "Recepty",
-    renderIcon: () => <ScaledIcon src="/assets/icon-recepty.svg" size={32} />,
+    renderIcon: () => <ScaledIcon src="/assets/icon-recepty.svg" size={36} />,
   },
   {
     id: "deniky",
