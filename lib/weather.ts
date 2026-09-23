@@ -1,18 +1,52 @@
+import {
+  buildDayHighlight,
+  type WeatherHighlight,
+} from "./highlight";
+
 export type WeatherSlot = {
   label: string;
   icon: string;
   display: string;
   wide?: boolean;
+  kind?: "now" | "radar";
 };
 
 export type WeatherInfo = {
   city: string;
   nowC: number;
   slots: WeatherSlot[];
+  highlight: WeatherHighlight;
   source: "windy" | "open-meteo";
 };
 
-const BRNO = { lat: 49.1951, lon: 16.6068, name: "Brno" };
+export type { WeatherHighlight, WeatherMood } from "./highlight";
+export { HIGHLIGHT_THEMES } from "./highlight";
+
+export const BRNO = { lat: 49.1951, lon: 16.6068, name: "Brno" };
+
+export function windyRadarEmbedUrl(lat = BRNO.lat, lon = BRNO.lon) {
+  const params = new URLSearchParams({
+    lat: lat.toFixed(3),
+    lon: lon.toFixed(3),
+    detailLat: lat.toFixed(3),
+    detailLon: lon.toFixed(3),
+    width: "343",
+    height: "160",
+    zoom: "7",
+    level: "surface",
+    overlay: "radar",
+    product: "radar",
+    calendar: "now",
+    type: "map",
+    location: "coordinates",
+    metricWind: "km/h",
+    metricTemp: "°C",
+    metricRain: "mm",
+    radarRange: "-1",
+    lang: "cs",
+  });
+  return `https://embed.windy.com/embed.html?${params.toString()}`;
+}
 
 const ICONS = {
   sun: "/assets/weather-now.svg",
@@ -76,6 +110,9 @@ type WindyResponse = {
   "past3hprecip-surface"?: number[];
   "lclouds-surface"?: number[];
   "mclouds-surface"?: number[];
+  "gust-surface"?: number[];
+  "cape-surface"?: number[];
+  "convPrecip-surface"?: number[];
 };
 
 async function fetchWindy(): Promise<WeatherInfo | null> {
@@ -89,7 +126,15 @@ async function fetchWindy(): Promise<WeatherInfo | null> {
       lat: BRNO.lat,
       lon: BRNO.lon,
       model: "gfs",
-      parameters: ["temp", "precip", "lclouds", "mclouds"],
+      parameters: [
+        "temp",
+        "precip",
+        "lclouds",
+        "mclouds",
+        "windGust",
+        "cape",
+        "convPrecip",
+      ],
       levels: ["surface"],
       key,
     }),
@@ -103,6 +148,9 @@ async function fetchWindy(): Promise<WeatherInfo | null> {
   const precips = data["past3hprecip-surface"] ?? [];
   const lclouds = data["lclouds-surface"] ?? [];
   const mclouds = data["mclouds-surface"] ?? [];
+  const gusts = data["gust-surface"] ?? [];
+  const capes = data["cape-surface"] ?? [];
+  const convPrecips = data["convPrecip-surface"] ?? [];
   if (!times.length || !tempsK.length) return null;
 
   const now = Date.now();
@@ -139,11 +187,47 @@ async function fetchWindy(): Promise<WeatherInfo | null> {
   const afternoonClouds =
     (lclouds[afternoonIndex] ?? 0) + (mclouds[afternoonIndex] ?? 0);
 
+  let todayMaxC = nowC;
+  let todayMinC = nowC;
+  let todayPrecip = 0;
+  let todayGustMs = 0;
+  let todayCape = 0;
+  let todayClouds = nowClouds;
+  times.forEach((ts, index) => {
+    if (pragueDateKey(ts) !== todayKey) return;
+    const t = tempC(tempsK[index]);
+    todayMaxC = Math.max(todayMaxC, t);
+    todayMinC = Math.min(todayMinC, t);
+    todayPrecip += precips[index] ?? 0;
+    todayGustMs = Math.max(todayGustMs, gusts[index] ?? 0);
+    todayCape = Math.max(todayCape, capes[index] ?? 0);
+    todayClouds = Math.max(
+      todayClouds,
+      (lclouds[index] ?? 0) + (mclouds[index] ?? 0),
+    );
+  });
+  const todayConv = convPrecips.reduce((sum, value, index) => {
+    if (pragueDateKey(times[index]) !== todayKey) return sum;
+    return sum + (value ?? 0);
+  }, 0);
+
+  const highlight = buildDayHighlight({
+    maxC: todayMaxC,
+    minC: todayMinC,
+    precipMm: todayPrecip + todayConv,
+    maxGustKmh: todayGustMs * 3.6,
+    hasFog: todayClouds >= 90 && todayMinC < 12,
+    hasStorm: todayCape >= 1000,
+    hasShower: todayConv >= 0.5,
+    cloudiness: todayClouds,
+  });
+
   const slots: WeatherSlot[] = [
     {
       label: "Nyní",
       icon: iconFor(nowPrecip, undefined, nowClouds),
       display: `${roundC(nowC)}°C`,
+      kind: "now",
     },
     {
       label: "Meteoradar",
@@ -153,6 +237,7 @@ async function fetchWindy(): Promise<WeatherInfo | null> {
         " mm",
       ),
       wide: true,
+      kind: "radar",
     },
     {
       label: "Odpoledne",
@@ -181,6 +266,7 @@ async function fetchWindy(): Promise<WeatherInfo | null> {
     city: BRNO.name,
     nowC: roundC(nowC),
     slots: slots.slice(0, 8),
+    highlight,
     source: "windy",
   };
 }
@@ -196,12 +282,15 @@ type OpenMeteoResponse = {
     temperature_2m: number[];
     precipitation: number[];
     weather_code: number[];
+    wind_gusts_10m: number[];
   };
   daily: {
     time: string[];
     temperature_2m_max: number[];
+    temperature_2m_min: number[];
     weather_code: number[];
     precipitation_sum: number[];
+    wind_gusts_10m_max: number[];
   };
 };
 
@@ -215,11 +304,11 @@ async function fetchOpenMeteo(): Promise<WeatherInfo> {
   );
   url.searchParams.set(
     "hourly",
-    "temperature_2m,precipitation,weather_code",
+    "temperature_2m,precipitation,weather_code,wind_gusts_10m",
   );
   url.searchParams.set(
     "daily",
-    "temperature_2m_max,weather_code,precipitation_sum",
+    "temperature_2m_max,temperature_2m_min,weather_code,precipitation_sum,wind_gusts_10m_max",
   );
   url.searchParams.set("timezone", "Europe/Prague");
   url.searchParams.set("forecast_days", "7");
@@ -241,18 +330,36 @@ async function fetchOpenMeteo(): Promise<WeatherInfo> {
   const afternoonC = data.hourly.temperature_2m[afternoonIndex] ?? nowC;
   const afternoonCode = data.hourly.weather_code[afternoonIndex];
   const afternoonPrecip = data.hourly.precipitation[afternoonIndex] ?? 0;
+  const todayKey = data.daily.time[0];
+  const todayHourlyCodes = data.hourly.weather_code.filter(
+    (_, index) => data.hourly.time[index]?.startsWith(todayKey),
+  );
+  const highlight = buildDayHighlight({
+    maxC: data.daily.temperature_2m_max[0] ?? nowC,
+    minC: data.daily.temperature_2m_min[0] ?? nowC,
+    precipMm: data.daily.precipitation_sum[0] ?? nowPrecip,
+    weatherCode: data.daily.weather_code[0],
+    maxGustKmh: data.daily.wind_gusts_10m_max[0] ?? 0,
+    hasFog: todayHourlyCodes.some((code) => code === 45 || code === 48),
+    hasStorm: todayHourlyCodes.some(
+      (code) => code === 95 || code === 96 || code === 99,
+    ),
+    hasShower: todayHourlyCodes.some((code) => code >= 80 && code <= 82),
+  });
 
   const slots: WeatherSlot[] = [
     {
       label: "Nyní",
       icon: iconFor(nowPrecip, data.current.weather_code),
       display: `${roundC(nowC)}°C`,
+      kind: "now",
     },
     {
       label: "Meteoradar",
       icon: "/assets/weather-radar.svg",
       display: `${Number(nowPrecip.toFixed(nowPrecip >= 1 ? 0 : 1))} mm`,
       wide: true,
+      kind: "radar",
     },
     {
       label: "Odpoledne",
@@ -277,6 +384,7 @@ async function fetchOpenMeteo(): Promise<WeatherInfo> {
     city: BRNO.name,
     nowC: roundC(nowC),
     slots: slots.slice(0, 8),
+    highlight,
     source: "open-meteo",
   };
 }

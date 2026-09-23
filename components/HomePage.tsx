@@ -33,7 +33,10 @@ export function HomePage({
         ) : (
           <EmailGadget />
         )}
-        <NameDay {...nameday} />
+        <NameDay
+          {...nameday}
+          className={variant === "weather" ? "mt-6" : "mt-4"}
+        />
         <NewsTeaser />
       </div>
     </div>
