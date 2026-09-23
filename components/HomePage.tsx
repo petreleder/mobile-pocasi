@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { EmailGadget } from "./EmailGadget";
 import { Header } from "./Header";
 import { NameDay } from "./NameDay";
@@ -7,18 +8,45 @@ import { NewsTeaser } from "./NewsTeaser";
 import { SearchBar } from "./SearchBar";
 import { ServiceCarousel, type ServiceId } from "./ServiceCarousel";
 import { WeatherGadget } from "./WeatherGadget";
+import { WeatherGadgetV2 } from "./WeatherGadgetV2";
 import type { NameDayInfo } from "@/lib/nameday";
 import type { WeatherInfo } from "@/lib/weather";
+import {
+  lastWeatherHref,
+  otherWeatherHref,
+  rememberWeatherVersion,
+  WEATHER_HREF,
+  type WeatherVersion,
+} from "@/lib/weather-version";
+
+export type { WeatherVersion };
 
 export function HomePage({
   variant = "email",
+  weatherVersion = "pocasi-1",
   nameday,
   weather,
 }: {
   variant?: ServiceId;
+  weatherVersion?: WeatherVersion;
   nameday: NameDayInfo;
   weather: WeatherInfo;
 }) {
+  const [weatherHref, setWeatherHref] = useState(
+    WEATHER_HREF[weatherVersion],
+  );
+
+  useEffect(() => {
+    if (variant === "weather") {
+      rememberWeatherVersion(weatherVersion);
+      setWeatherHref(WEATHER_HREF[weatherVersion]);
+      return;
+    }
+    setWeatherHref(lastWeatherHref());
+  }, [variant, weatherVersion]);
+
+  const toggleHref = otherWeatherHref(weatherVersion);
+
   return (
     <div className="flex min-h-full justify-center bg-white">
       <div id="home-screen" className="w-full max-w-[375px] bg-white">
@@ -26,10 +54,19 @@ export function HomePage({
         <SearchBar />
         <ServiceCarousel
           activeId={variant}
+          weatherHref={weatherHref}
           weatherLabel={`${weather.nowC}°C`}
+          weatherIcon={
+            weather.slots.find((slot) => slot.kind === "now")?.icon ??
+            "/assets/weather-now.svg"
+          }
         />
         {variant === "weather" ? (
-          <WeatherGadget weather={weather} />
+          weatherVersion === "pocasi-2" ? (
+            <WeatherGadgetV2 weather={weather} toggleHref={toggleHref} />
+          ) : (
+            <WeatherGadget weather={weather} toggleHref={toggleHref} />
+          )
         ) : (
           <EmailGadget />
         )}

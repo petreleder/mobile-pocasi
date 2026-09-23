@@ -1,5 +1,7 @@
 import {
   buildDayHighlight,
+  buildDayHighlightV2,
+  type DayStats,
   type WeatherHighlight,
 } from "./highlight";
 
@@ -8,7 +10,8 @@ export type WeatherSlot = {
   icon: string;
   display: string;
   wide?: boolean;
-  kind?: "now" | "radar";
+  kind?: "now" | "radar" | "day";
+  precipMm?: number;
 };
 
 export type WeatherInfo = {
@@ -16,11 +19,18 @@ export type WeatherInfo = {
   nowC: number;
   slots: WeatherSlot[];
   highlight: WeatherHighlight;
+  highlightV2: WeatherHighlight;
   source: "windy" | "open-meteo";
 };
 
 export type { WeatherHighlight, WeatherMood } from "./highlight";
-export { HIGHLIGHT_THEMES } from "./highlight";
+export { HIGHLIGHT_THEMES, HIGHLIGHT_THEMES_V2 } from "./highlight";
+
+export function dayPrecipLabel(mm: number | undefined): string | null {
+  if (mm === undefined || mm < 0.2) return null;
+  if (mm >= 1) return `${Math.round(mm)} mm`;
+  return `${Number(mm.toFixed(1))} mm`;
+}
 
 export const BRNO = { lat: 49.1951, lon: 16.6068, name: "Brno" };
 
@@ -93,6 +103,16 @@ function pragueHour(ms: number) {
       hourCycle: "h23",
     }).format(new Date(ms)),
   );
+}
+
+function packHighlights(today: DayStats, tomorrow?: DayStats) {
+  return {
+    highlight: buildDayHighlight(today),
+    highlightV2: buildDayHighlightV2(today, {
+      hour: pragueHour(Date.now()),
+      tomorrow,
+    }),
+  };
 }
 
 function pragueDateKey(ms: number) {
@@ -211,7 +231,7 @@ async function fetchWindy(): Promise<WeatherInfo | null> {
     return sum + (value ?? 0);
   }, 0);
 
-  const highlight = buildDayHighlight({
+  const todayStats: DayStats = {
     maxC: todayMaxC,
     minC: todayMinC,
     precipMm: todayPrecip + todayConv,
@@ -220,7 +240,7 @@ async function fetchWindy(): Promise<WeatherInfo | null> {
     hasStorm: todayCape >= 1000,
     hasShower: todayConv >= 0.5,
     cloudiness: todayClouds,
-  });
+  };
 
   const slots: WeatherSlot[] = [
     {
@@ -246,27 +266,79 @@ async function fetchWindy(): Promise<WeatherInfo | null> {
     },
   ];
 
-  const seenDays = new Set<string>([todayKey]);
+  const dayStats = new Map<
+    string,
+    {
+      maxC: number;
+      minC: number;
+      precip: number;
+      clouds: number;
+      cape: number;
+      conv: number;
+      gustMs: number;
+    }
+  >();
   times.forEach((ts, index) => {
     const key = pragueDateKey(ts);
-    if (seenDays.has(key)) return;
-    const hour = pragueHour(ts);
-    if (hour < 12 || hour > 15) return;
-    seenDays.add(key);
-    const precip = precips[index] ?? 0;
+    const t = tempC(tempsK[index]);
+    const precip = (precips[index] ?? 0) + (convPrecips[index] ?? 0);
     const clouds = (lclouds[index] ?? 0) + (mclouds[index] ?? 0);
+    const prev = dayStats.get(key);
+    if (!prev) {
+      dayStats.set(key, {
+        maxC: t,
+        minC: t,
+        precip,
+        clouds,
+        cape: capes[index] ?? 0,
+        conv: convPrecips[index] ?? 0,
+        gustMs: gusts[index] ?? 0,
+      });
+      return;
+    }
+    prev.maxC = Math.max(prev.maxC, t);
+    prev.minC = Math.min(prev.minC, t);
+    prev.precip += precip;
+    prev.clouds = Math.max(prev.clouds, clouds);
+    prev.cape = Math.max(prev.cape, capes[index] ?? 0);
+    prev.conv += convPrecips[index] ?? 0;
+    prev.gustMs = Math.max(prev.gustMs, gusts[index] ?? 0);
+  });
+
+  const orderedDays = [...dayStats.keys()]
+    .filter((key) => key > todayKey)
+    .sort();
+  for (const key of orderedDays) {
+    const stats = dayStats.get(key);
+    if (!stats) continue;
     slots.push({
       label: weekdayLabel(key),
-      icon: iconFor(precip, undefined, clouds),
-      display: `${roundC(tempC(tempsK[index]))}°C`,
+      icon: iconFor(stats.precip, undefined, stats.clouds),
+      display: `${roundC(stats.maxC)}°C`,
+      kind: "day",
+      precipMm: stats.precip,
     });
-  });
+  }
+
+  const tomorrowAgg = dayStats.get(orderedDays[0]);
+  const tomorrow: DayStats | undefined = tomorrowAgg
+    ? {
+        maxC: tomorrowAgg.maxC,
+        minC: tomorrowAgg.minC,
+        precipMm: tomorrowAgg.precip,
+        maxGustKmh: tomorrowAgg.gustMs * 3.6,
+        hasFog: tomorrowAgg.clouds >= 90 && tomorrowAgg.minC < 12,
+        hasStorm: tomorrowAgg.cape >= 1000,
+        hasShower: tomorrowAgg.conv >= 0.5,
+        cloudiness: tomorrowAgg.clouds,
+      }
+    : undefined;
 
   return {
     city: BRNO.name,
     nowC: roundC(nowC),
-    slots: slots.slice(0, 8),
-    highlight,
+    slots: slots.slice(0, 10),
+    ...packHighlights(todayStats, tomorrow),
     source: "windy",
   };
 }
@@ -334,18 +406,33 @@ async function fetchOpenMeteo(): Promise<WeatherInfo> {
   const todayHourlyCodes = data.hourly.weather_code.filter(
     (_, index) => data.hourly.time[index]?.startsWith(todayKey),
   );
-  const highlight = buildDayHighlight({
-    maxC: data.daily.temperature_2m_max[0] ?? nowC,
-    minC: data.daily.temperature_2m_min[0] ?? nowC,
-    precipMm: data.daily.precipitation_sum[0] ?? nowPrecip,
-    weatherCode: data.daily.weather_code[0],
-    maxGustKmh: data.daily.wind_gusts_10m_max[0] ?? 0,
-    hasFog: todayHourlyCodes.some((code) => code === 45 || code === 48),
-    hasStorm: todayHourlyCodes.some(
-      (code) => code === 95 || code === 96 || code === 99,
-    ),
-    hasShower: todayHourlyCodes.some((code) => code >= 80 && code <= 82),
+  const codesFor = (iso: string | undefined) =>
+    iso
+      ? data.hourly.weather_code.filter((_, index) =>
+          data.hourly.time[index]?.startsWith(iso),
+        )
+      : [];
+  const statsFromDaily = (index: number, codes: number[]): DayStats => ({
+    maxC: data.daily.temperature_2m_max[index] ?? nowC,
+    minC: data.daily.temperature_2m_min[index] ?? nowC,
+    precipMm: data.daily.precipitation_sum[index] ?? 0,
+    weatherCode: data.daily.weather_code[index],
+    maxGustKmh: data.daily.wind_gusts_10m_max[index] ?? 0,
+    hasFog: codes.some((code) => code === 45 || code === 48),
+    hasStorm: codes.some((code) => code === 95 || code === 96 || code === 99),
+    hasShower: codes.some((code) => code >= 80 && code <= 82),
+    cloudiness:
+      data.daily.weather_code[index] === 3
+        ? 90
+        : data.daily.weather_code[index] === 2
+          ? 50
+          : 20,
   });
+  const todayStats = statsFromDaily(0, todayHourlyCodes);
+  const tomorrowKey = data.daily.time[1];
+  const tomorrow = tomorrowKey
+    ? statsFromDaily(1, codesFor(tomorrowKey))
+    : undefined;
 
   const slots: WeatherSlot[] = [
     {
@@ -377,14 +464,16 @@ async function fetchOpenMeteo(): Promise<WeatherInfo> {
         data.daily.weather_code[index],
       ),
       display: `${roundC(data.daily.temperature_2m_max[index])}°C`,
+      kind: "day",
+      precipMm: data.daily.precipitation_sum[index] ?? 0,
     });
   });
 
   return {
     city: BRNO.name,
     nowC: roundC(nowC),
-    slots: slots.slice(0, 8),
-    highlight,
+    slots: slots.slice(0, 10),
+    ...packHighlights(todayStats, tomorrow),
     source: "open-meteo",
   };
 }

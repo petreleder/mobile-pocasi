@@ -19,11 +19,11 @@ function CircleIcon({ src }: { src: string }) {
   );
 }
 
-function WeatherIcon() {
+function WeatherIcon({ src }: { src: string }) {
   return (
     <span className="relative flex size-9 items-center justify-center overflow-visible">
       <img
-        src="/assets/icon-weather.svg"
+        src={src}
         alt=""
         draggable={false}
         className="max-w-none shrink-0"
@@ -123,7 +123,7 @@ const services: Service[] = [
   {
     id: "weather",
     href: "/pocasi",
-    renderIcon: () => <WeatherIcon />,
+    renderIcon: () => <WeatherIcon src="/assets/weather-now.svg" />,
   },
   {
     id: "tv",
@@ -197,10 +197,14 @@ function itemClass(active: boolean, isWeather: boolean) {
 
 export function ServiceCarousel({
   activeId = "email",
+  weatherHref = "/pocasi",
   weatherLabel = "–",
+  weatherIcon = "/assets/weather-now.svg",
 }: {
   activeId?: ServiceId;
+  weatherHref?: string;
   weatherLabel?: string;
+  weatherIcon?: string;
 }) {
   return (
     <SwipeRow className="mt-8 gap-4 pr-4 pl-4">
@@ -209,10 +213,18 @@ export function ServiceCarousel({
         const className = `flex min-w-12 shrink-0 snap-start flex-col items-center gap-1.5`;
         const label =
           service.id === "weather" ? weatherLabel : (service.label ?? "");
+        const icon =
+          service.id === "weather" ? (
+            <WeatherIcon src={weatherIcon} />
+          ) : (
+            service.renderIcon()
+          );
+        const href =
+          service.id === "weather" ? weatherHref : service.href;
         const inner = (
           <>
             <span className="flex size-9 items-center justify-center overflow-visible">
-              {service.renderIcon()}
+              {icon}
             </span>
             <span
               className={`text-[12px] leading-[1.3] whitespace-nowrap ${itemClass(
@@ -225,11 +237,11 @@ export function ServiceCarousel({
           </>
         );
 
-        if (service.href) {
+        if (href) {
           return (
             <Link
               key={service.id}
-              href={service.href}
+              href={href}
               className={className}
               aria-current={active ? "page" : undefined}
             >

@@ -1,7 +1,10 @@
 "use client";
 
+/** pocasi-1: header Počasí • Brno, now card, Meteoradar, Odpoledne. */
+
 import { useState } from "react";
 import { SwipeRow } from "./SwipeRow";
+import { WeatherStripToggle } from "./WeatherStripToggle";
 import {
   HIGHLIGHT_THEMES,
   windyRadarEmbedUrl,
@@ -28,8 +31,13 @@ function NowCard({
       }}
     >
       <div className="flex items-end gap-2.5 pl-1">
-        <span className="relative flex h-12 w-[54px] items-center justify-center">
-          <img src={icon} alt="" draggable={false} className="max-w-none" />
+        <span className="relative size-12 shrink-0 overflow-visible">
+          <img
+            src={icon}
+            alt=""
+            draggable={false}
+            className="absolute top-1/2 left-1/2 h-[52px] w-[52px] max-w-none -translate-x-1/2 -translate-y-1/2"
+          />
         </span>
         <div className="flex flex-col items-start">
           <p className="pl-0.5 text-[12px] leading-4 text-[#666]">nyní</p>
@@ -41,20 +49,25 @@ function NowCard({
           </div>
         </div>
       </div>
-      <p className="px-1 text-[12px] leading-4 whitespace-nowrap text-[#666]">
-        {highlight.line1}
-        <br />
-        {highlight.line2}
+      <p className="flex h-8 items-center px-1 text-[12px] leading-4 text-[#666]">
+        <span>{`${highlight.line1} ${highlight.line2}`}</span>
       </p>
     </div>
   );
 }
 
-export function WeatherGadget({ weather }: { weather: WeatherInfo }) {
+export function WeatherGadget({
+  weather,
+  toggleHref = "/pocasi-2",
+}: {
+  weather: WeatherInfo;
+  toggleHref?: string;
+}) {
   const [radarOpen, setRadarOpen] = useState(false);
 
   return (
     <section className="mt-3.5">
+      <WeatherStripToggle href={toggleHref}>
       <div className="h-px w-full bg-[#ffae00]" />
       <div className="flex items-center justify-between px-4 pt-[5px]">
         <div className="flex items-center gap-1.5 text-[14px] whitespace-nowrap">
@@ -62,18 +75,12 @@ export function WeatherGadget({ weather }: { weather: WeatherInfo }) {
           <span className="leading-5 text-[#ccc]">•</span>
           <span className="leading-5 text-[#666]">{weather.city}</span>
         </div>
-        <button
-          type="button"
-          className="flex size-8 items-center justify-center"
-          aria-label="Další"
-        >
+        <span className="flex size-8 items-center justify-center">
           <img src="/assets/icon-overflow.svg" alt="" className="rotate-90" />
-        </button>
+        </span>
       </div>
-      <div className="mt-1 px-4">
-        <div className="h-px w-full bg-[rgba(0,0,0,0.12)]" />
-      </div>
-      <SwipeRow className="mt-1 items-center gap-4 pr-4 pl-4">
+      <SwipeRow className="mt-1 scroll-pl-4">
+        <div className="flex shrink-0 items-center gap-4 pr-4 pl-4">
         {weather.slots.map((slot, index) => {
           if (slot.kind === "now") {
             return (
@@ -163,7 +170,11 @@ export function WeatherGadget({ weather }: { weather: WeatherInfo }) {
                 aria-label={
                   radarOpen ? "Zavřít meteoradar" : "Zobrazit meteoradar"
                 }
-                onClick={() => setRadarOpen((open) => !open)}
+                onClick={(event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  setRadarOpen((open) => !open);
+                }}
               >
                 {inner}
               </button>
@@ -176,11 +187,12 @@ export function WeatherGadget({ weather }: { weather: WeatherInfo }) {
             </div>
           );
         })}
+        </div>
       </SwipeRow>
-      <div className="mt-1 px-4">
-        <div className="h-px w-full bg-[rgba(0,0,0,0.12)]" />
-        {radarOpen ? (
-          <div className="mt-3 overflow-hidden rounded-lg">
+      </WeatherStripToggle>
+      {radarOpen ? (
+        <div className="mt-3 px-4">
+          <div className="overflow-hidden rounded-lg">
             <iframe
               title="Windy meteoradar"
               src={windyRadarEmbedUrl()}
@@ -190,8 +202,10 @@ export function WeatherGadget({ weather }: { weather: WeatherInfo }) {
               allow="fullscreen"
             />
           </div>
-        ) : null}
-      </div>
+        </div>
+      ) : null}
     </section>
   );
 }
+
+export const WeatherGadgetV1 = WeatherGadget;
