@@ -9,6 +9,7 @@ import { SearchBar } from "./SearchBar";
 import { ServiceCarousel, type ServiceId } from "./ServiceCarousel";
 import { WeatherGadget } from "./WeatherGadget";
 import { WeatherGadgetV2 } from "./WeatherGadgetV2";
+import { WeatherGadgetV3 } from "./WeatherGadgetV3";
 import type { NameDayInfo } from "@/lib/nameday";
 import type { WeatherInfo } from "@/lib/weather";
 import {
@@ -62,7 +63,9 @@ export function HomePage({
           }
         />
         {variant === "weather" ? (
-          weatherVersion === "pocasi-2" ? (
+          weatherVersion === "pocasi-3" ? (
+            <WeatherGadgetV3 weather={weather} toggleHref={toggleHref} />
+          ) : weatherVersion === "pocasi-2" ? (
             <WeatherGadgetV2 weather={weather} toggleHref={toggleHref} />
           ) : (
             <WeatherGadget weather={weather} toggleHref={toggleHref} />

@@ -59,6 +59,35 @@ export function windyRadarEmbedUrl(lat = BRNO.lat, lon = BRNO.lon) {
   return `https://embed.windy.com/embed.html?${params.toString()}`;
 }
 
+/** Oversized radar embed, cropped in the now-card so Windy chrome stays off-screen. */
+export function windyRadarBackdropUrl(lat = BRNO.lat, lon = BRNO.lon) {
+  const params = new URLSearchParams({
+    lat: lat.toFixed(3),
+    lon: lon.toFixed(3),
+    detailLat: lat.toFixed(3),
+    detailLon: lon.toFixed(3),
+    width: "700",
+    height: "450",
+    zoom: "8",
+    level: "surface",
+    overlay: "radar",
+    product: "radar",
+    calendar: "now",
+    type: "map",
+    location: "coordinates",
+    metricWind: "km/h",
+    metricTemp: "°C",
+    metricRain: "mm",
+    radarRange: "-1",
+    lang: "cs",
+    menu: "",
+    message: "",
+    marker: "",
+    detail: "",
+  });
+  return `https://embed.windy.com/embed.html?${params.toString()}`;
+}
+
 function iconFor(input: {
   precipMm: number;
   weatherCode?: number;

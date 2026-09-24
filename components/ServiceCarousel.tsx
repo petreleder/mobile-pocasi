@@ -31,6 +31,10 @@ function WeatherIcon({ src }: { src: string }) {
   );
 }
 
+function stillWeatherIcon(src: string) {
+  return src.endsWith(".json") ? src.replace(/\.json$/, ".svg") : src;
+}
+
 function TvIcon() {
   return (
     <span className="size-9 overflow-hidden rounded-[10px]">
@@ -215,7 +219,9 @@ export function ServiceCarousel({
           service.id === "weather" ? weatherLabel : (service.label ?? "");
         const icon =
           service.id === "weather" ? (
-            <WeatherIcon src={weatherIcon} />
+            <WeatherIcon
+              src={activeId === "weather" ? stillWeatherIcon(weatherIcon) : weatherIcon}
+            />
           ) : (
             service.renderIcon()
           );
