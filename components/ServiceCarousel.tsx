@@ -207,7 +207,8 @@ export function ServiceCarousel({
   weatherIcon?: string;
 }) {
   return (
-    <SwipeRow className="mt-8 gap-4 pr-4 pl-4">
+    <SwipeRow className="mt-8 scroll-pl-4">
+      <div className="flex shrink-0 items-start gap-4 pr-4 pl-4">
       {services.map((service) => {
         const active = service.id === activeId;
         const className = `flex min-w-12 shrink-0 snap-start flex-col items-center gap-1.5`;
@@ -256,6 +257,7 @@ export function ServiceCarousel({
           </button>
         );
       })}
+      </div>
     </SwipeRow>
   );
 }

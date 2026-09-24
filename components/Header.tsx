@@ -1,6 +1,6 @@
 export function Header() {
   return (
-    <header className="relative mt-10 flex h-10 items-center justify-center px-4">
+    <header className="relative mt-[max(2.5rem,env(safe-area-inset-top))] flex h-10 items-center justify-center px-4">
       <img src="/assets/logo.svg" alt="Seznam.cz" />
       <div className="absolute top-0 right-4 size-10">
         <img src="/assets/avatar.svg" alt="" />

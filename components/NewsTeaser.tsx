@@ -1,6 +1,6 @@
 export function NewsTeaser() {
   return (
-    <section className="mt-1 px-4 pb-8">
+    <section className="mt-1 px-4 pb-16">
       <div className="relative h-[27px] w-full">
         <div className="flex items-center gap-1 pt-[3px]">
           <img

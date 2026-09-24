@@ -48,8 +48,8 @@ export function HomePage({
   const toggleHref = otherWeatherHref(weatherVersion);
 
   return (
-    <div className="flex min-h-full justify-center bg-white">
-      <div id="home-screen" className="w-full max-w-[375px] bg-white">
+    <div className="flex min-h-dvh justify-center bg-white">
+      <div id="home-screen" className="w-full max-w-[393px] min-h-dvh bg-white">
         <Header />
         <SearchBar />
         <ServiceCarousel

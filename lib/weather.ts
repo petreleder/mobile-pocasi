@@ -40,7 +40,7 @@ export function windyRadarEmbedUrl(lat = BRNO.lat, lon = BRNO.lon) {
     lon: lon.toFixed(3),
     detailLat: lat.toFixed(3),
     detailLon: lon.toFixed(3),
-    width: "343",
+    width: "361",
     height: "160",
     zoom: "7",
     level: "surface",

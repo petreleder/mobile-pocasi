@@ -22,7 +22,7 @@ export function SearchBar() {
   return (
     <div className="mt-5 flex flex-col items-center px-4">
       {aiMode ? (
-        <label className="flex h-20 w-[343px] items-start rounded-2xl border border-solid border-[#aaa] bg-white px-5 pt-3.5">
+        <label className="flex h-20 w-full items-start rounded-2xl border border-solid border-[#aaa] bg-white px-5 pt-3.5">
           <textarea
             value={query}
             onChange={(event) => setQuery(event.target.value)}
@@ -32,7 +32,7 @@ export function SearchBar() {
           />
         </label>
       ) : (
-        <label className="flex h-14 w-[343px] items-center gap-2 rounded-[48px] border border-solid border-[#aaa] bg-white py-4 pr-4 pl-4">
+        <label className="flex h-14 w-full items-center gap-2 rounded-[48px] border border-solid border-[#aaa] bg-white py-4 pr-4 pl-4">
           <span className="flex size-6 shrink-0 items-center justify-center overflow-hidden">
             <img src="/assets/search.svg" alt="" />
           </span>
