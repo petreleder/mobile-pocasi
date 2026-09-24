@@ -1,4 +1,4 @@
-/** Seznam weather states 1–22 (legend), day/night SVG + GIF for “now”. */
+/** Seznam weather states 1–22 (legend), day/night SVG + Lottie JSON for “now”. */
 
 const ICON_IDS = [
   1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 21, 22,
@@ -129,7 +129,7 @@ export function weatherIconSrc(input: WeatherIconInput): string {
   const id = weatherIconId(input);
   const pad = String(id).padStart(2, "0");
   const period = input.night ? "night" : "day";
-  const ext = input.animated ? "gif" : "svg";
+  const ext = input.animated ? "json" : "svg";
   return `/assets/weather/${period}${pad}.${ext}`;
 }
 

@@ -4,6 +4,7 @@
 
 import { useState } from "react";
 import { SwipeRow } from "./SwipeRow";
+import { WeatherAnimIcon } from "./WeatherAnimIcon";
 import { WeatherStripToggle } from "./WeatherStripToggle";
 import {
   HIGHLIGHT_THEMES,
@@ -32,10 +33,8 @@ function NowCard({
     >
       <div className="flex items-end gap-2.5 pl-1">
         <span className="relative size-12 shrink-0 overflow-visible">
-          <img
+          <WeatherAnimIcon
             src={icon}
-            alt=""
-            draggable={false}
             className="absolute top-1/2 left-1/2 h-[52px] w-[52px] max-w-none -translate-x-1/2 -translate-y-1/2 object-contain"
           />
         </span>
@@ -49,8 +48,13 @@ function NowCard({
           </div>
         </div>
       </div>
-      <p className="flex h-8 items-center px-1 text-[12px] leading-4 text-[#666]">
-        <span>{`${highlight.line1} ${highlight.line2}`}</span>
+      <p className="flex w-full min-h-8 flex-col justify-center px-1 text-[12px] leading-4 text-[#666]">
+        <span className="block w-full overflow-hidden text-ellipsis whitespace-nowrap">
+          {highlight.line1}
+        </span>
+        <span className="block w-full overflow-hidden text-ellipsis whitespace-nowrap">
+          {highlight.line2}
+        </span>
       </p>
     </div>
   );
@@ -88,7 +92,7 @@ export function WeatherGadget({
                 key={`${slot.label}-${index}`}
                 icon={slot.icon}
                 tempC={weather.nowC}
-                highlight={weather.highlight}
+                highlight={weather.highlightV2}
               />
             );
           }

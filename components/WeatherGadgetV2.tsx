@@ -3,6 +3,7 @@
 /** pocasi-2: no gadget header, Brno nyní on the first card, daily precip totals. */
 
 import { SwipeRow } from "./SwipeRow";
+import { WeatherAnimIcon } from "./WeatherAnimIcon";
 import { WeatherStripToggle } from "./WeatherStripToggle";
 import {
   HIGHLIGHT_THEMES_V2,
@@ -34,10 +35,8 @@ function NowCard({
         <span className="text-[#666]"> nyní</span>
       </p>
       <div className="flex h-[46px] items-center gap-2.5">
-        <img
+        <WeatherAnimIcon
           src={icon}
-          alt=""
-          draggable={false}
           className="size-10 max-w-none shrink-0 object-contain"
         />
         <div className="flex items-start">

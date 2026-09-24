@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { SwipeRow } from "./SwipeRow";
+import { WeatherAnimIcon } from "./WeatherAnimIcon";
 
 export type ServiceId = "email" | "weather";
 
@@ -22,10 +23,8 @@ function CircleIcon({ src }: { src: string }) {
 function WeatherIcon({ src }: { src: string }) {
   return (
     <span className="relative flex size-9 items-center justify-center overflow-visible">
-      <img
+      <WeatherAnimIcon
         src={src}
-        alt=""
-        draggable={false}
         className="size-9 max-w-none shrink-0 object-contain"
       />
     </span>
