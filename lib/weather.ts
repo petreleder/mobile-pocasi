@@ -4,6 +4,7 @@ import {
   type DayStats,
   type WeatherHighlight,
 } from "./highlight";
+import { isNightInPrague, weatherIconSrc } from "./weather-icons";
 
 export type WeatherSlot = {
   label: string;
@@ -58,23 +59,16 @@ export function windyRadarEmbedUrl(lat = BRNO.lat, lon = BRNO.lon) {
   return `https://embed.windy.com/embed.html?${params.toString()}`;
 }
 
-const ICONS = {
-  sun: "/assets/weather-now.svg",
-  cloud: "/assets/weather-sat.svg",
-  rain: "/assets/weather-afternoon.svg",
-  rainAlt: "/assets/weather-thu.svg",
-};
-
-function iconFor(precipMm: number, weatherCode?: number, clouds?: number) {
-  if (precipMm >= 0.2) return ICONS.rain;
-  if (weatherCode !== undefined) {
-    if (weatherCode >= 51) return ICONS.rain;
-    if (weatherCode >= 45) return ICONS.cloud;
-    if (weatherCode >= 3) return ICONS.cloud;
-    return ICONS.sun;
-  }
-  if ((clouds ?? 0) >= 70) return ICONS.cloud;
-  return ICONS.sun;
+function iconFor(input: {
+  precipMm: number;
+  weatherCode?: number;
+  clouds?: number;
+  hasStorm?: boolean;
+  tempC?: number;
+  night?: boolean;
+  animated?: boolean;
+}) {
+  return weatherIconSrc(input);
 }
 
 function roundC(value: number) {
@@ -188,6 +182,8 @@ async function fetchWindy(): Promise<WeatherInfo | null> {
   const nowC = tempC(tempsK[nowIndex]);
   const nowPrecip = precips[nowIndex] ?? 0;
   const nowClouds = (lclouds[nowIndex] ?? 0) + (mclouds[nowIndex] ?? 0);
+  const nowStorm = (capes[nowIndex] ?? 0) >= 1000;
+  const nightNow = isNightInPrague(now);
 
   const todayKey = pragueDateKey(now);
   let afternoonIndex = nowIndex;
@@ -206,6 +202,7 @@ async function fetchWindy(): Promise<WeatherInfo | null> {
   const afternoonPrecip = precips[afternoonIndex] ?? 0;
   const afternoonClouds =
     (lclouds[afternoonIndex] ?? 0) + (mclouds[afternoonIndex] ?? 0);
+  const afternoonStorm = (capes[afternoonIndex] ?? 0) >= 1000;
 
   let todayMaxC = nowC;
   let todayMinC = nowC;
@@ -245,7 +242,14 @@ async function fetchWindy(): Promise<WeatherInfo | null> {
   const slots: WeatherSlot[] = [
     {
       label: "Nyní",
-      icon: iconFor(nowPrecip, undefined, nowClouds),
+      icon: iconFor({
+        precipMm: nowPrecip,
+        clouds: nowClouds,
+        hasStorm: nowStorm,
+        tempC: nowC,
+        night: nightNow,
+        animated: true,
+      }),
       display: `${roundC(nowC)}°C`,
       kind: "now",
     },
@@ -261,7 +265,12 @@ async function fetchWindy(): Promise<WeatherInfo | null> {
     },
     {
       label: "Odpoledne",
-      icon: iconFor(afternoonPrecip, undefined, afternoonClouds),
+      icon: iconFor({
+        precipMm: afternoonPrecip,
+        clouds: afternoonClouds,
+        hasStorm: afternoonStorm,
+        tempC: afternoonC,
+      }),
       display: `${roundC(afternoonC)}°C`,
     },
   ];
@@ -313,7 +322,12 @@ async function fetchWindy(): Promise<WeatherInfo | null> {
     if (!stats) continue;
     slots.push({
       label: weekdayLabel(key),
-      icon: iconFor(stats.precip, undefined, stats.clouds),
+      icon: iconFor({
+        precipMm: stats.precip,
+        clouds: stats.clouds,
+        hasStorm: stats.cape >= 1000,
+        tempC: stats.minC,
+      }),
       display: `${roundC(stats.maxC)}°C`,
       kind: "day",
       precipMm: stats.precip,
@@ -348,6 +362,8 @@ type OpenMeteoResponse = {
     temperature_2m: number;
     precipitation: number;
     weather_code: number;
+    is_day: number;
+    cloud_cover: number;
   };
   hourly: {
     time: string[];
@@ -355,6 +371,7 @@ type OpenMeteoResponse = {
     precipitation: number[];
     weather_code: number[];
     wind_gusts_10m: number[];
+    cloud_cover: number[];
   };
   daily: {
     time: string[];
@@ -372,11 +389,11 @@ async function fetchOpenMeteo(): Promise<WeatherInfo> {
   url.searchParams.set("longitude", String(BRNO.lon));
   url.searchParams.set(
     "current",
-    "temperature_2m,precipitation,weather_code",
+    "temperature_2m,precipitation,weather_code,is_day,cloud_cover",
   );
   url.searchParams.set(
     "hourly",
-    "temperature_2m,precipitation,weather_code,wind_gusts_10m",
+    "temperature_2m,precipitation,weather_code,wind_gusts_10m,cloud_cover",
   );
   url.searchParams.set(
     "daily",
@@ -437,7 +454,14 @@ async function fetchOpenMeteo(): Promise<WeatherInfo> {
   const slots: WeatherSlot[] = [
     {
       label: "Nyní",
-      icon: iconFor(nowPrecip, data.current.weather_code),
+      icon: iconFor({
+        precipMm: nowPrecip,
+        weatherCode: data.current.weather_code,
+        clouds: data.current.cloud_cover,
+        tempC: nowC,
+        night: data.current.is_day === 0,
+        animated: true,
+      }),
       display: `${roundC(nowC)}°C`,
       kind: "now",
     },
@@ -450,7 +474,12 @@ async function fetchOpenMeteo(): Promise<WeatherInfo> {
     },
     {
       label: "Odpoledne",
-      icon: iconFor(afternoonPrecip, afternoonCode),
+      icon: iconFor({
+        precipMm: afternoonPrecip,
+        weatherCode: afternoonCode,
+        clouds: data.hourly.cloud_cover[afternoonIndex],
+        tempC: afternoonC,
+      }),
       display: `${roundC(afternoonC)}°C`,
     },
   ];
@@ -459,10 +488,11 @@ async function fetchOpenMeteo(): Promise<WeatherInfo> {
     const index = offset + 1;
     slots.push({
       label: weekdayLabel(iso),
-      icon: iconFor(
-        data.daily.precipitation_sum[index],
-        data.daily.weather_code[index],
-      ),
+      icon: iconFor({
+        precipMm: data.daily.precipitation_sum[index] ?? 0,
+        weatherCode: data.daily.weather_code[index],
+        tempC: data.daily.temperature_2m_min[index],
+      }),
       display: `${roundC(data.daily.temperature_2m_max[index])}°C`,
       kind: "day",
       precipMm: data.daily.precipitation_sum[index] ?? 0,

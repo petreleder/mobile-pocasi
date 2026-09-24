@@ -26,7 +26,7 @@ function WeatherIcon({ src }: { src: string }) {
         src={src}
         alt=""
         draggable={false}
-        className="max-w-none shrink-0"
+        className="size-9 max-w-none shrink-0 object-contain"
       />
     </span>
   );

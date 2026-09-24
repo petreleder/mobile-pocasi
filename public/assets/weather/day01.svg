@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Vrstva_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 200 200">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: url(#Nepojmenovaný_přechod_114);
+      }
+
+      .cls-2 {
+        fill: url(#Nepojmenovaný_přechod_114-2);
+      }
+
+      .cls-3 {
+        fill: #a5a6a5;
+      }
+
+      .cls-4 {
+        fill: url(#Nepojmenovaný_přechod_49);
+      }
+
+      .cls-5 {
+        fill: url(#Nepojmenovaný_přechod_7);
+      }
+
+      .cls-6 {
+        fill: url(#Nepojmenovaný_přechod_35);
+      }
+
+      .cls-7 {
+        fill: url(#Nepojmenovaný_přechod_201);
+      }
+    </style>
+    <radialGradient id="Nepojmenovaný_přechod_114" data-name="Nepojmenovaný přechod 114" cx="-1037.053" cy="-70.921" fx="-1037.053" fy="-70.921" r="102.806" gradientTransform="translate(617.917 102.585) scale(.541 .305)" gradientUnits="userSpaceOnUse">
+      <stop offset=".2" stop-color="#7ab7cc" stop-opacity=".3"/>
+      <stop offset=".394" stop-color="#71b0c6" stop-opacity=".256"/>
+      <stop offset=".709" stop-color="#5ba0b7" stop-opacity=".137"/>
+      <stop offset="1" stop-color="#428da6" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="Nepojmenovaný_přechod_114-2" data-name="Nepojmenovaný přechod 114" cx="-448.478" cy="-14.965" fx="-448.478" fy="-14.965" r="102.795" gradientTransform="translate(436.962 72.619) scale(.689 .446)" xlink:href="#Nepojmenovaný_přechod_114"/>
+    <radialGradient id="Nepojmenovaný_přechod_49" data-name="Nepojmenovaný přechod 49" cx="-1555.797" cy=".797" fx="-1555.797" fy=".797" r="102.807" gradientTransform="translate(783.46 138.755) scale(.416 .234)" gradientUnits="userSpaceOnUse">
+      <stop offset=".2" stop-color="#7ab7cc" stop-opacity=".3"/>
+      <stop offset=".394" stop-color="#71b0c6" stop-opacity=".256"/>
+      <stop offset=".709" stop-color="#5ba0b7" stop-opacity=".137"/>
+      <stop offset="1" stop-color="#428da6" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="Nepojmenovaný_přechod_35" data-name="Nepojmenovaný přechod 35" cx="96.887" cy="102.467" fx="96.887" fy="102.467" r="77.441" gradientTransform="translate(100.832 -38.497) rotate(45)" gradientUnits="userSpaceOnUse">
+      <stop offset=".238" stop-color="#ffcc28"/>
+      <stop offset=".311" stop-color="#ffcc28" stop-opacity=".98"/>
+      <stop offset=".399" stop-color="#ffcc28" stop-opacity=".923"/>
+      <stop offset=".495" stop-color="#ffcc28" stop-opacity=".828"/>
+      <stop offset=".596" stop-color="#ffcc28" stop-opacity=".696"/>
+      <stop offset=".7" stop-color="#ffcc28" stop-opacity=".526"/>
+      <stop offset=".809" stop-color="#ffcc28" stop-opacity=".318"/>
+      <stop offset=".918" stop-color="#ffcc28" stop-opacity=".076"/>
+      <stop offset=".95" stop-color="#ffcc28" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="Nepojmenovaný_přechod_7" data-name="Nepojmenovaný přechod 7" cx="96.887" cy="102.467" fx="96.887" fy="102.467" r="76.698" gradientUnits="userSpaceOnUse">
+      <stop offset=".3" stop-color="#f90"/>
+      <stop offset=".39" stop-color="#ff9b03" stop-opacity=".98"/>
+      <stop offset=".498" stop-color="#ffa20c" stop-opacity=".923"/>
+      <stop offset=".615" stop-color="#ffad1a" stop-opacity=".829"/>
+      <stop offset=".738" stop-color="#ffbd2f" stop-opacity=".697"/>
+      <stop offset=".865" stop-color="#ffd149" stop-opacity=".529"/>
+      <stop offset=".95" stop-color="#ffe15e" stop-opacity=".4"/>
+      <stop offset="1" stop-color="#ffe15e" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="Nepojmenovaný_přechod_201" data-name="Nepojmenovaný přechod 201" cx="96.887" cy="102.467" fx="96.887" fy="102.467" r="39.393" gradientTransform="translate(153.829 -26.545) rotate(67.212)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fffcf0"/>
+      <stop offset="1" stop-color="#ffcf33"/>
+    </radialGradient>
+  </defs>
+  <ellipse class="cls-1" cx="56.871" cy="80.942" rx="55.728" ry="31.363"/>
+  <ellipse class="cls-2" cx="127.871" cy="65.942" rx="70.985" ry="45.85"/>
+  <ellipse class="cls-4" cx="136.871" cy="138.942" rx="42.811" ry="24.094"/>
+  <g>
+    <path class="cls-3" d="M157.37,42.381c-.332-5.114,6.121-7.873,9.823-4.379,1.21,1.081,1.987,2.691,2.064,4.379h-2c.087-1.167-.308-2.389-1.125-3.319-2.921-3.381-8.608-1.113-8.762,3.319h0Z"/>
+    <path class="cls-3" d="M167.258,42.381c.496-7.802,11.888-7.95,11.887,0-.079-1.429-.746-2.773-1.771-3.672-3.091-2.868-8.439-.564-8.116,3.673,0,0-2,0-2,0h0Z"/>
+  </g>
+  <g>
+    <path class="cls-3" d="M15.932,40.64c-.071-6.155,8.742-5.999,9.165,0,0,0-2,0-2,0,.144-4.831-6.817-4.67-7.165,0h0Z"/>
+    <path class="cls-3" d="M23.097,40.64c.425-6.004,9.238-6.151,9.165,0-.081-1.072-.601-2.062-1.373-2.71-2.227-2.026-6.129-.314-5.793,2.71,0,0-2,0-2,0h0Z"/>
+  </g>
+  <g>
+    <path class="cls-3" d="M130.958,27.901c-.448-7.226,8.523-11.066,13.795-6.18,1.712,1.52,2.819,3.792,2.935,6.18h-3c.087-9.224-13.069-9.001-13.73,0h0Z"/>
+    <path class="cls-3" d="M144.688,27.901c.785-11.017,16.71-11.2,16.73,0-.119-1.999-1.06-3.872-2.496-5.119-4.3-3.958-11.713-.754-11.234,5.119,0,0-3,0-3,0h0Z"/>
+  </g>
+  <g>
+    <circle class="cls-6" cx="96.887" cy="102.467" r="77.441" transform="translate(-44.078 98.521) rotate(-45)"/>
+    <polygon class="cls-5" points="136.225 114.681 173.251 117.415 138.168 106.068 169.229 102.233 137.864 98.566 173.109 86.799 136.392 89.859 163.634 74.325 133.265 83.045 161.363 58.568 128.602 75.569 147.877 50.701 123.128 70.48 139.801 37.02 115.983 65.374 124.357 34.959 108.995 62.786 111.706 25.436 100.457 60.825 96.655 29.493 93.02 61.132 81.354 25.579 84.388 62.617 68.989 35.137 77.633 65.771 53.368 37.428 70.221 70.475 45.569 51.032 65.177 75.997 32.006 59.178 60.115 83.204 29.962 74.757 57.548 90.253 20.522 87.519 55.606 98.866 24.545 102.701 55.909 106.368 20.665 118.135 57.382 115.075 30.14 130.609 60.508 121.889 32.41 146.366 65.172 129.365 45.897 154.232 70.646 134.454 53.973 167.914 77.791 139.56 69.417 169.976 84.779 142.148 82.068 179.498 93.316 144.108 97.119 175.441 100.754 143.802 112.42 179.354 109.386 142.317 124.785 169.797 116.141 139.163 140.407 167.506 123.553 134.459 148.205 153.902 128.596 128.936 161.767 145.756 133.66 121.73 163.811 130.177 136.225 114.681"/>
+    <circle class="cls-7" cx="96.887" cy="102.467" r="39.393" transform="translate(-35.108 152.103) rotate(-67.212)"/>
+  </g>
+</svg>

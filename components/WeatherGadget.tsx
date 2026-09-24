@@ -36,7 +36,7 @@ function NowCard({
             src={icon}
             alt=""
             draggable={false}
-            className="absolute top-1/2 left-1/2 h-[52px] w-[52px] max-w-none -translate-x-1/2 -translate-y-1/2"
+            className="absolute top-1/2 left-1/2 h-[52px] w-[52px] max-w-none -translate-x-1/2 -translate-y-1/2 object-contain"
           />
         </span>
         <div className="flex flex-col items-start">
@@ -135,7 +135,11 @@ export function WeatherGadget({
                     src={slot.icon}
                     alt=""
                     draggable={false}
-                    className="max-w-none shrink-0"
+                    className={
+                      isRadar
+                        ? "max-w-none shrink-0"
+                        : "size-10 max-w-none shrink-0 object-contain"
+                    }
                   />
                 )}
               </span>

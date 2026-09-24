@@ -38,7 +38,7 @@ function NowCard({
           src={icon}
           alt=""
           draggable={false}
-          className="size-10 max-w-none shrink-0"
+          className="size-10 max-w-none shrink-0 object-contain"
         />
         <div className="flex items-start">
           <span className="text-center text-[26px] leading-8 font-bold text-[#111]">
@@ -73,7 +73,7 @@ function DayCard({ slot }: { slot: WeatherSlot }) {
           src={slot.icon}
           alt=""
           draggable={false}
-          className="size-10 max-w-none"
+          className="size-10 max-w-none object-contain"
         />
       </span>
       {precip ? (
