@@ -1,10 +1,7 @@
 import { HomePage } from "@/components/HomePage";
-import { getNameDay } from "@/lib/nameday";
-import { getWeather } from "@/lib/weather";
-
-export const revalidate = 300;
+import { loadHome } from "@/lib/load-home";
 
 export default async function Home() {
-  const [nameday, weather] = await Promise.all([getNameDay(), getWeather()]);
+  const { nameday, weather } = await loadHome();
   return <HomePage nameday={nameday} weather={weather} />;
 }

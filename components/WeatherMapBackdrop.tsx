@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState, type CSSProperties } from "react";
-import { BRNO, windyRadarBackdropUrl } from "@/lib/weather";
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
+import { windyRadarBackdropUrl } from "@/lib/weather";
 
 const VIEW_W = 222;
 const VIEW_H = 122;
@@ -10,8 +10,8 @@ const TILE = 256;
 const RADAR_ZOOM = 7;
 const RADAR_SIZE = 512;
 const RADAR_COLOR = 6;
-const BRNO_X = 0.8;
-const BRNO_Y = 0.46;
+const CITY_X = 0.8;
+const CITY_Y = 0.46;
 const FRAME_MS = 400;
 const HOLD_LAST_MS = 1200;
 const API_URL = "https://api.rainviewer.com/public/weather-maps.json";
@@ -28,10 +28,9 @@ function lat2tile(lat: number, zoom: number) {
   );
 }
 
-const originX = lon2tile(BRNO.lon, BASE_ZOOM) * TILE - VIEW_W * BRNO_X;
-const originY = lat2tile(BRNO.lat, BASE_ZOOM) * TILE - VIEW_H * BRNO_Y;
-
-function basemapTiles() {
+function basemapFor(lat: number, lon: number) {
+  const originX = lon2tile(lon, BASE_ZOOM) * TILE - VIEW_W * CITY_X;
+  const originY = lat2tile(lat, BASE_ZOOM) * TILE - VIEW_H * CITY_Y;
   const x0 = Math.floor(originX / TILE);
   const y0 = Math.floor(originY / TILE);
   const x1 = Math.floor((originX + VIEW_W - 1) / TILE);
@@ -47,17 +46,15 @@ function basemapTiles() {
       });
     }
   }
-  return tiles;
+  const radarDisplay = RADAR_SIZE * 2 ** (BASE_ZOOM - RADAR_ZOOM);
+  const radarStyle: CSSProperties = {
+    width: radarDisplay,
+    height: radarDisplay,
+    left: lon2tile(lon, BASE_ZOOM) * TILE - originX - radarDisplay / 2,
+    top: lat2tile(lat, BASE_ZOOM) * TILE - originY - radarDisplay / 2,
+  };
+  return { tiles, radarStyle };
 }
-
-const BASEMAP = basemapTiles();
-const radarDisplay = RADAR_SIZE * 2 ** (BASE_ZOOM - RADAR_ZOOM);
-const RADAR_STYLE: CSSProperties = {
-  width: radarDisplay,
-  height: radarDisplay,
-  left: lon2tile(BRNO.lon, BASE_ZOOM) * TILE - originX - radarDisplay / 2,
-  top: lat2tile(BRNO.lat, BASE_ZOOM) * TILE - originY - radarDisplay / 2,
-};
 
 type RadarApi = {
   host: string;
@@ -67,13 +64,16 @@ type RadarApi = {
   };
 };
 
-export function WeatherMapBackdrop() {
+export function WeatherMapBackdrop({ lat, lon }: { lat: number; lon: number }) {
+  const { tiles, radarStyle } = useMemo(() => basemapFor(lat, lon), [lat, lon]);
   const [frames, setFrames] = useState<string[]>([]);
   const [index, setIndex] = useState(0);
   const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
+    setFrames([]);
+    setFailed(false);
     fetch(API_URL)
       .then((res) => {
         if (!res.ok) throw new Error(String(res.status));
@@ -87,7 +87,7 @@ export function WeatherMapBackdrop() {
         ];
         const urls = list.map(
           (frame) =>
-            `${data.host}${frame.path}/${RADAR_SIZE}/${RADAR_ZOOM}/${BRNO.lat}/${BRNO.lon}/${RADAR_COLOR}/1_1.png`,
+            `${data.host}${frame.path}/${RADAR_SIZE}/${RADAR_ZOOM}/${lat}/${lon}/${RADAR_COLOR}/1_1.png`,
         );
         if (!urls.length) throw new Error("empty");
         setFrames(urls);
@@ -99,7 +99,7 @@ export function WeatherMapBackdrop() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [lat, lon]);
 
   useEffect(() => {
     if (frames.length < 2) return;
@@ -121,7 +121,7 @@ export function WeatherMapBackdrop() {
       {failed ? (
         <iframe
           title=""
-          src={windyRadarBackdropUrl()}
+          src={windyRadarBackdropUrl(lat, lon)}
           tabIndex={-1}
           loading="eager"
           referrerPolicy="no-referrer-when-downgrade"
@@ -137,7 +137,7 @@ export function WeatherMapBackdrop() {
         />
       ) : (
         <>
-          {BASEMAP.map((tile) => (
+          {tiles.map((tile) => (
             <img
               key={tile.key}
               src={tile.src}
@@ -158,7 +158,7 @@ export function WeatherMapBackdrop() {
               alt=""
               className="absolute max-w-none"
               style={{
-                ...RADAR_STYLE,
+                ...radarStyle,
                 opacity: frameIndex === index ? 0.88 : 0,
                 transition: "opacity 160ms linear",
               }}

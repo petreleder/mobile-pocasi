@@ -2,6 +2,7 @@
 
 /** pocasi-2: no gadget header, Brno nyní on the first card, daily precip totals. */
 
+import { CityButton } from "./CityButton";
 import { SwipeRow } from "./SwipeRow";
 import { WeatherAnimIcon } from "./WeatherAnimIcon";
 import { WeatherStripToggle } from "./WeatherStripToggle";
@@ -18,11 +19,13 @@ function NowCard({
   icon,
   tempC,
   highlight,
+  onOpenCity,
 }: {
   city: string;
   icon: string;
   tempC: number;
   highlight: WeatherHighlight;
+  onOpenCity: () => void;
 }) {
   const theme = HIGHLIGHT_THEMES_V2[highlight.mood];
   return (
@@ -31,7 +34,12 @@ function NowCard({
       style={{ backgroundImage: theme.background }}
     >
       <p className="text-[12px] leading-4 whitespace-nowrap">
-        <span className="text-[#111]">{city}</span>
+        <CityButton
+          name={city}
+          onOpen={onOpenCity}
+          className="text-[#111]"
+          chevron="none"
+        />
         <span className="text-[#666]"> nyní</span>
       </p>
       <div className="flex h-[46px] items-center gap-2.5">
@@ -102,9 +110,11 @@ function DayCard({ slot }: { slot: WeatherSlot }) {
 export function WeatherGadgetV2({
   weather,
   toggleHref = "/pocasi",
+  onOpenCity,
 }: {
   weather: WeatherInfo;
   toggleHref?: string;
+  onOpenCity: () => void;
 }) {
   const now = weather.slots.find((slot) => slot.kind === "now");
   const days = weather.slots.filter((slot) => slot.kind === "day");
@@ -120,6 +130,7 @@ export function WeatherGadgetV2({
               icon={now?.icon ?? "/assets/weather-now.svg"}
               tempC={weather.nowC}
               highlight={weather.highlightV2}
+              onOpenCity={onOpenCity}
             />
             <div className="flex shrink-0 items-start gap-4">
               {days.map((slot, index) => (

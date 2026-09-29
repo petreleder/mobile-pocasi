@@ -3,6 +3,7 @@
 /** pocasi-1: header Počasí • Brno, now card, Meteoradar, Odpoledne. */
 
 import { useState } from "react";
+import { CityButton } from "./CityButton";
 import { SwipeRow } from "./SwipeRow";
 import { WeatherAnimIcon } from "./WeatherAnimIcon";
 import { WeatherStripToggle } from "./WeatherStripToggle";
@@ -63,9 +64,11 @@ function NowCard({
 export function WeatherGadget({
   weather,
   toggleHref = "/pocasi-2",
+  onOpenCity,
 }: {
   weather: WeatherInfo;
   toggleHref?: string;
+  onOpenCity: () => void;
 }) {
   const [radarOpen, setRadarOpen] = useState(false);
 
@@ -77,7 +80,11 @@ export function WeatherGadget({
         <div className="flex items-center gap-1.5 text-[14px] whitespace-nowrap">
           <span className="font-bold leading-[22px] text-[#111]">Počasí</span>
           <span className="leading-5 text-[#ccc]">•</span>
-          <span className="leading-5 text-[#666]">{weather.city}</span>
+          <CityButton
+            name={weather.city}
+            onOpen={onOpenCity}
+            className="leading-5 text-[#666]"
+          />
         </div>
         <span className="flex size-8 items-center justify-center">
           <img src="/assets/icon-overflow.svg" alt="" className="rotate-90" />
@@ -203,7 +210,7 @@ export function WeatherGadget({
           <div className="overflow-hidden rounded-lg">
             <iframe
               title="Windy meteoradar"
-              src={windyRadarEmbedUrl()}
+              src={windyRadarEmbedUrl(weather.lat, weather.lon)}
               className="block h-40 w-full border-0"
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"

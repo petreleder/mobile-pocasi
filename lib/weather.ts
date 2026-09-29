@@ -1,3 +1,4 @@
+import { DEFAULT_CITY, type City } from "./cities";
 import {
   buildDayHighlight,
   buildDayHighlightV2,
@@ -17,6 +18,9 @@ export type WeatherSlot = {
 
 export type WeatherInfo = {
   city: string;
+  cityId: string;
+  lat: number;
+  lon: number;
   nowC: number;
   slots: WeatherSlot[];
   highlight: WeatherHighlight;
@@ -33,7 +37,7 @@ export function dayPrecipLabel(mm: number | undefined): string | null {
   return `${Number(mm.toFixed(1))} mm`;
 }
 
-export const BRNO = { lat: 49.1951, lon: 16.6068, name: "Brno" };
+export const BRNO = DEFAULT_CITY;
 
 export function windyRadarEmbedUrl(lat = BRNO.lat, lon = BRNO.lon) {
   const params = new URLSearchParams({
@@ -158,7 +162,7 @@ type WindyResponse = {
   "convPrecip-surface"?: number[];
 };
 
-async function fetchWindy(): Promise<WeatherInfo | null> {
+async function fetchWindy(place: City): Promise<WeatherInfo | null> {
   const key = process.env.WINDY_API_KEY;
   if (!key) return null;
 
@@ -166,8 +170,8 @@ async function fetchWindy(): Promise<WeatherInfo | null> {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      lat: BRNO.lat,
-      lon: BRNO.lon,
+      lat: place.lat,
+      lon: place.lon,
       model: "gfs",
       parameters: [
         "temp",
@@ -378,7 +382,10 @@ async function fetchWindy(): Promise<WeatherInfo | null> {
     : undefined;
 
   return {
-    city: BRNO.name,
+    city: place.name,
+    cityId: place.id,
+    lat: place.lat,
+    lon: place.lon,
     nowC: roundC(nowC),
     slots: slots.slice(0, 10),
     ...packHighlights(todayStats, tomorrow),
@@ -412,10 +419,10 @@ type OpenMeteoResponse = {
   };
 };
 
-async function fetchOpenMeteo(): Promise<WeatherInfo> {
+async function fetchOpenMeteo(place: City): Promise<WeatherInfo> {
   const url = new URL("https://api.open-meteo.com/v1/forecast");
-  url.searchParams.set("latitude", String(BRNO.lat));
-  url.searchParams.set("longitude", String(BRNO.lon));
+  url.searchParams.set("latitude", String(place.lat));
+  url.searchParams.set("longitude", String(place.lon));
   url.searchParams.set(
     "current",
     "temperature_2m,precipitation,weather_code,is_day,cloud_cover",
@@ -529,7 +536,10 @@ async function fetchOpenMeteo(): Promise<WeatherInfo> {
   });
 
   return {
-    city: BRNO.name,
+    city: place.name,
+    cityId: place.id,
+    lat: place.lat,
+    lon: place.lon,
     nowC: roundC(nowC),
     slots: slots.slice(0, 10),
     ...packHighlights(todayStats, tomorrow),
@@ -537,12 +547,12 @@ async function fetchOpenMeteo(): Promise<WeatherInfo> {
   };
 }
 
-export async function getWeather(): Promise<WeatherInfo> {
+export async function getWeather(place: City = DEFAULT_CITY): Promise<WeatherInfo> {
   try {
-    const windy = await fetchWindy();
+    const windy = await fetchWindy(place);
     if (windy) return windy;
   } catch {
     // Windy key missing or request failed — live fallback below.
   }
-  return fetchOpenMeteo();
+  return fetchOpenMeteo(place);
 }

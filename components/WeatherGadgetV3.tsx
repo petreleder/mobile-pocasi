@@ -2,6 +2,7 @@
 
 /** pocasi-3: now card on a cropped Windy radar map, white type, daily precip. */
 
+import { CityButton } from "./CityButton";
 import { SwipeRow } from "./SwipeRow";
 import { WeatherAnimIcon } from "./WeatherAnimIcon";
 import { WeatherMapBackdrop } from "./WeatherMapBackdrop";
@@ -18,18 +19,29 @@ function NowCard({
   icon,
   tempC,
   highlight,
+  lat,
+  lon,
+  onOpenCity,
 }: {
   city: string;
   icon: string;
   tempC: number;
   highlight: WeatherHighlight;
+  lat: number;
+  lon: number;
+  onOpenCity: () => void;
 }) {
   return (
     <div className="relative flex h-[122px] w-[222px] shrink-0 snap-start flex-col items-start justify-center gap-0.5 overflow-hidden pt-4 pr-2 pb-2 pl-5">
-      <WeatherMapBackdrop />
+      <WeatherMapBackdrop lat={lat} lon={lon} />
       <p className="relative z-10 text-[12px] leading-4 whitespace-nowrap">
-        <span className="text-white">{city}</span>
-        <span className="text-white/64"> nyní</span>
+        <CityButton
+          name={city}
+          onOpen={onOpenCity}
+          className="text-white"
+          chevron="none"
+        />
+        <span className="text-white"> nyní</span>
       </p>
       <div className="relative z-10 flex h-[46px] items-center gap-2.5">
         <WeatherAnimIcon
@@ -45,7 +57,10 @@ function NowCard({
           </span>
         </div>
       </div>
-      <p className="relative z-10 flex w-full min-h-8 flex-col justify-center text-[12px] leading-4 text-white/64">
+      <p
+        className="relative z-10 flex w-full min-h-8 flex-col justify-center text-[12px] leading-4 text-white"
+        style={{ textShadow: "0 1px 2px #000, 0 0 6px rgba(0,0,0,0.7)" }}
+      >
         <span className="block w-full overflow-hidden text-ellipsis whitespace-nowrap">
           {highlight.line1}
         </span>
@@ -99,9 +114,11 @@ function DayCard({ slot }: { slot: WeatherSlot }) {
 export function WeatherGadgetV3({
   weather,
   toggleHref = "/pocasi",
+  onOpenCity,
 }: {
   weather: WeatherInfo;
   toggleHref?: string;
+  onOpenCity: () => void;
 }) {
   const now = weather.slots.find((slot) => slot.kind === "now");
   const days = weather.slots.filter((slot) => slot.kind === "day");
@@ -117,6 +134,9 @@ export function WeatherGadgetV3({
               icon={now?.icon ?? "/assets/weather-now.svg"}
               tempC={weather.nowC}
               highlight={weather.highlightV2}
+              lat={weather.lat}
+              lon={weather.lon}
+              onOpenCity={onOpenCity}
             />
             {days.map((slot, index) => (
               <DayCard key={`${slot.label}-${index}`} slot={slot} />
