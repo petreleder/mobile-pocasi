@@ -14,6 +14,7 @@ export type WeatherSlot = {
   wide?: boolean;
   kind?: "now" | "radar" | "day";
   precipMm?: number;
+  minC?: number;
 };
 
 export type WeatherInfo = {
@@ -132,6 +133,33 @@ function pragueHour(ms: number) {
   );
 }
 
+function combineCloudLayers(low = 0, mid = 0) {
+  const l = Math.min(1, Math.max(0, low / 100));
+  const m = Math.min(1, Math.max(0, mid / 100));
+  return Math.round((1 - (1 - l) * (1 - m)) * 100);
+}
+
+function closestHourIndex(times: number[], dateKey: string, hour: number) {
+  let best = -1;
+  let bestDiff = Infinity;
+  times.forEach((ts, index) => {
+    if (pragueDateKey(ts) !== dateKey) return;
+    const diff = Math.abs(pragueHour(ts) - hour);
+    if (diff < bestDiff) {
+      bestDiff = diff;
+      best = index;
+    }
+  });
+  return best;
+}
+
+function openMeteoHourIndex(times: string[], isoDate: string, hour = 15) {
+  const stamp = `${isoDate}T${String(hour).padStart(2, "0")}:00`;
+  const exact = times.findIndex((time) => time.startsWith(stamp));
+  if (exact >= 0) return exact;
+  return times.findIndex((time) => time.startsWith(isoDate));
+}
+
 function packHighlights(today: DayStats, tomorrow?: DayStats) {
   return {
     highlight: buildDayHighlight(today),
@@ -198,6 +226,8 @@ async function fetchWindy(place: City): Promise<WeatherInfo | null> {
   const gusts = data["gust-surface"] ?? [];
   const capes = data["cape-surface"] ?? [];
   const convPrecips = data["convPrecip-surface"] ?? [];
+  const cloudsAt = (index: number) =>
+    combineCloudLayers(lclouds[index] ?? 0, mclouds[index] ?? 0);
   if (!times.length || !tempsK.length) return null;
 
   const now = Date.now();
@@ -214,7 +244,7 @@ async function fetchWindy(place: City): Promise<WeatherInfo | null> {
   const tempC = (kelvin: number) => kelvin - 273.15;
   const nowC = tempC(tempsK[nowIndex]);
   const nowPrecip = precips[nowIndex] ?? 0;
-  const nowClouds = (lclouds[nowIndex] ?? 0) + (mclouds[nowIndex] ?? 0);
+  const nowClouds = cloudsAt(nowIndex);
   const nowStorm = (capes[nowIndex] ?? 0) >= 1000;
   const nightNow = isNightInPrague(now);
 
@@ -233,8 +263,7 @@ async function fetchWindy(place: City): Promise<WeatherInfo | null> {
 
   const afternoonC = tempC(tempsK[afternoonIndex]);
   const afternoonPrecip = precips[afternoonIndex] ?? 0;
-  const afternoonClouds =
-    (lclouds[afternoonIndex] ?? 0) + (mclouds[afternoonIndex] ?? 0);
+  const afternoonClouds = cloudsAt(afternoonIndex);
   const afternoonStorm = (capes[afternoonIndex] ?? 0) >= 1000;
 
   let todayMaxC = nowC;
@@ -251,10 +280,7 @@ async function fetchWindy(place: City): Promise<WeatherInfo | null> {
     todayPrecip += precips[index] ?? 0;
     todayGustMs = Math.max(todayGustMs, gusts[index] ?? 0);
     todayCape = Math.max(todayCape, capes[index] ?? 0);
-    todayClouds = Math.max(
-      todayClouds,
-      (lclouds[index] ?? 0) + (mclouds[index] ?? 0),
-    );
+    todayClouds = Math.max(todayClouds, cloudsAt(index));
   });
   const todayConv = convPrecips.reduce((sum, value, index) => {
     if (pragueDateKey(times[index]) !== todayKey) return sum;
@@ -324,7 +350,7 @@ async function fetchWindy(place: City): Promise<WeatherInfo | null> {
     const key = pragueDateKey(ts);
     const t = tempC(tempsK[index]);
     const precip = (precips[index] ?? 0) + (convPrecips[index] ?? 0);
-    const clouds = (lclouds[index] ?? 0) + (mclouds[index] ?? 0);
+    const clouds = cloudsAt(index);
     const prev = dayStats.get(key);
     if (!prev) {
       dayStats.set(key, {
@@ -353,17 +379,19 @@ async function fetchWindy(place: City): Promise<WeatherInfo | null> {
   for (const key of orderedDays) {
     const stats = dayStats.get(key);
     if (!stats) continue;
+    const look = closestHourIndex(times, key, 15);
     slots.push({
       label: weekdayLabel(key),
       icon: iconFor({
         precipMm: stats.precip,
-        clouds: stats.clouds,
+        clouds: look >= 0 ? cloudsAt(look) : stats.clouds,
         hasStorm: stats.cape >= 1000,
         tempC: stats.minC,
       }),
       display: `${roundC(stats.maxC)}°C`,
       kind: "day",
       precipMm: stats.precip,
+      minC: roundC(stats.minC),
     });
   }
 
@@ -522,16 +550,25 @@ async function fetchOpenMeteo(place: City): Promise<WeatherInfo> {
 
   data.daily.time.slice(1).forEach((iso, offset) => {
     const index = offset + 1;
+    const hourIndex = openMeteoHourIndex(data.hourly.time, iso);
     slots.push({
       label: weekdayLabel(iso),
       icon: iconFor({
         precipMm: data.daily.precipitation_sum[index] ?? 0,
-        weatherCode: data.daily.weather_code[index],
+        weatherCode:
+          hourIndex >= 0
+            ? data.hourly.weather_code[hourIndex]
+            : data.daily.weather_code[index],
+        clouds: hourIndex >= 0 ? data.hourly.cloud_cover[hourIndex] : undefined,
         tempC: data.daily.temperature_2m_min[index],
       }),
       display: `${roundC(data.daily.temperature_2m_max[index])}°C`,
       kind: "day",
       precipMm: data.daily.precipitation_sum[index] ?? 0,
+      minC: roundC(
+        data.daily.temperature_2m_min[index] ??
+          data.daily.temperature_2m_max[index],
+      ),
     });
   });
 

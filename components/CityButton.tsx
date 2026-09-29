@@ -41,8 +41,8 @@ export function CityButton({
         onOpen();
       }}
       className={`inline-flex max-w-full items-center gap-0.5 bg-transparent p-0 ${
-        chevron === "none" ? "underline" : ""
-      } ${className ?? ""}`}
+        className ?? ""
+      }`}
     >
       <span className="truncate">{name}</span>
       {chevron === "none" ? null : (

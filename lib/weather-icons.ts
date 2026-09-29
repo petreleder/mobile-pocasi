@@ -35,9 +35,8 @@ function coverFromClouds(clouds: number): Cover {
 }
 
 function coverFromCode(code: number): Cover {
-  if (code === 0) return 0;
-  if (code === 1) return 1;
-  if (code === 2) return 2;
+  if (code === 0 || code === 1) return 0;
+  if (code === 2) return 1;
   if (code === 3) return 3;
   if (code === 45 || code === 48) return 3;
   if (

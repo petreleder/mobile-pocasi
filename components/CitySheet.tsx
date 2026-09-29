@@ -1,12 +1,41 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
   cityFromId,
   filterRegions,
   nearestCity,
   type City,
 } from "@/lib/cities";
+
+function useVisibleFrame(active: boolean) {
+  const [frame, setFrame] = useState({ top: 0, height: 0, keyboard: false });
+
+  useLayoutEffect(() => {
+    if (!active) return;
+
+    const update = () => {
+      const vv = window.visualViewport;
+      const height = vv?.height ?? window.innerHeight;
+      const top = vv?.offsetTop ?? 0;
+      const inset = Math.max(0, window.innerHeight - height - top);
+      setFrame({ top, height, keyboard: inset > 80 });
+    };
+
+    update();
+    const vv = window.visualViewport;
+    vv?.addEventListener("resize", update);
+    vv?.addEventListener("scroll", update);
+    window.addEventListener("resize", update);
+    return () => {
+      vv?.removeEventListener("resize", update);
+      vv?.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
+    };
+  }, [active]);
+
+  return frame;
+}
 
 export function CitySheet({
   open,
@@ -25,8 +54,10 @@ export function CitySheet({
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [geoState, setGeoState] = useState<"idle" | "pending" | "denied">("idle");
   const searchRef = useRef<HTMLInputElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
   const searching = query.trim().length > 0;
   const regions = useMemo(() => filterRegions(query), [query]);
+  const frame = useVisibleFrame(open);
 
   const closeRef = useRef(onClose);
   closeRef.current = onClose;
@@ -52,6 +83,10 @@ export function CitySheet({
       document.body.style.overflow = previous;
     };
   }, [open]);
+
+  useEffect(() => {
+    listRef.current?.scrollTo({ top: 0 });
+  }, [query]);
 
   if (!open) return null;
 
@@ -88,7 +123,13 @@ export function CitySheet({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center">
+    <div
+      className="fixed left-0 right-0 z-50 flex items-end justify-center"
+      style={{
+        top: frame.height ? frame.top : 0,
+        height: frame.height || "100dvh",
+      }}
+    >
       <button
         type="button"
         aria-label="Zavřít výběr lokality"
@@ -99,7 +140,10 @@ export function CitySheet({
         role="dialog"
         aria-modal="true"
         aria-labelledby="city-sheet-title"
-        className="relative flex max-h-[80vh] w-full max-w-[393px] flex-col rounded-t-2xl bg-white shadow-[0_-8px_24px_rgba(0,0,0,0.12)]"
+        className={`relative flex min-h-0 w-full max-w-[393px] flex-col overflow-hidden rounded-t-2xl bg-white shadow-[0_-8px_24px_rgba(0,0,0,0.12)] ${
+          frame.keyboard ? "h-full" : ""
+        }`}
+        style={{ maxHeight: frame.keyboard ? "100%" : "80%" }}
       >
         <div className="flex items-center justify-between px-4 pt-3 pb-2">
           <h2
@@ -130,27 +174,32 @@ export function CitySheet({
             />
           </label>
         </div>
-        <div className="min-h-0 flex-1 overflow-y-auto px-1 pb-[max(12px,env(safe-area-inset-bottom))]">
+        <div
+          ref={listRef}
+          className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-1 pb-[max(12px,env(safe-area-inset-bottom))]"
+        >
           <div className="flex flex-col gap-0.5 p-2.5">
-            <button
-              type="button"
-              onClick={locate}
-              disabled={geoState === "pending" || busy}
-              className="flex w-full items-center rounded-[6px] py-2 pr-2 pl-3 text-left"
-            >
-              <span className="min-w-0">
-                <span className="block text-[14px] leading-4 font-bold text-[#111]">
-                  Aktuální poloha
-                </span>
-                {geoState !== "idle" ? (
-                  <span className="mt-0.5 block text-[12px] leading-4 text-[#666]">
-                    {geoState === "pending"
-                      ? "Zjišťuji polohu…"
-                      : "Polohu se nepodařilo zjistit"}
+            {searching ? null : (
+              <button
+                type="button"
+                onClick={locate}
+                disabled={geoState === "pending" || busy}
+                className="flex w-full items-center rounded-[6px] py-2 pr-2 pl-3 text-left"
+              >
+                <span className="min-w-0">
+                  <span className="block text-[14px] leading-4 font-bold text-[#111]">
+                    Aktuální poloha
                   </span>
-                ) : null}
-              </span>
-            </button>
+                  {geoState !== "idle" ? (
+                    <span className="mt-0.5 block text-[12px] leading-4 text-[#666]">
+                      {geoState === "pending"
+                        ? "Zjišťuji polohu…"
+                        : "Polohu se nepodařilo zjistit"}
+                    </span>
+                  ) : null}
+                </span>
+              </button>
+            )}
             {regions.length === 0 ? (
               <p className="px-3 py-6 text-[14px] leading-4 text-[#666]">
                 Žádné město se nenašlo

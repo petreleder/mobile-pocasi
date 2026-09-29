@@ -103,9 +103,16 @@ function DayCard({ slot }: { slot: WeatherSlot }) {
           </span>
         </div>
       ) : (
-        <p className="text-center text-[14px] leading-4 font-bold whitespace-nowrap text-[#111]">
-          {slot.display}
-        </p>
+        <div className="flex flex-col items-center">
+          <p className="text-center text-[14px] leading-4 font-bold whitespace-nowrap text-[#111]">
+            {slot.display}
+          </p>
+          {slot.minC !== undefined ? (
+            <p className="text-center text-[12px] leading-4 whitespace-nowrap text-[#666]">
+              {slot.minC}°C
+            </p>
+          ) : null}
+        </div>
       )}
     </div>
   );
