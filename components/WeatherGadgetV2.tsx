@@ -2,9 +2,11 @@
 
 /** pocasi-2: no gadget header, Brno nyní on the first card, daily precip totals. */
 
+import { useState } from "react";
 import { CityButton } from "./CityButton";
 import { SwipeRow } from "./SwipeRow";
 import { WeatherAnimIcon } from "./WeatherAnimIcon";
+import { WeatherMapBackdrop } from "./WeatherMapBackdrop";
 import { WeatherStripToggle } from "./WeatherStripToggle";
 import {
   HIGHLIGHT_THEMES_V2,
@@ -19,13 +21,17 @@ function NowCard({
   icon,
   tempC,
   highlight,
+  mapOpen,
   onOpenCity,
+  onToggleMap,
 }: {
   city: string;
   icon: string;
   tempC: number;
   highlight: WeatherHighlight;
+  mapOpen: boolean;
   onOpenCity: () => void;
+  onToggleMap: () => void;
 }) {
   const theme = HIGHLIGHT_THEMES_V2[highlight.mood];
   return (
@@ -43,10 +49,12 @@ function NowCard({
         <span className="text-[#666]"> nyní</span>
       </p>
       <div className="flex h-[46px] items-center gap-2.5">
-        <WeatherAnimIcon
-          src={icon}
-          className="size-10 max-w-none shrink-0 object-contain"
-        />
+        <span className="relative size-10 shrink-0 overflow-visible">
+          <WeatherAnimIcon
+            src={icon}
+            className="pointer-events-none absolute top-1/2 left-1/2 size-[52px] max-w-none -translate-x-1/2 -translate-y-1/2 object-contain"
+          />
+        </span>
         <div className="flex items-start">
           <span className="text-center text-[26px] leading-8 font-bold text-[#111]">
             {tempC}
@@ -55,6 +63,26 @@ function NowCard({
             °C
           </span>
         </div>
+        <button
+          type="button"
+          aria-expanded={mapOpen}
+          aria-label={mapOpen ? "Zavřít meteoradar" : "Zobrazit meteoradar"}
+          onClick={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            onToggleMap();
+          }}
+          className="flex size-6 shrink-0 items-center justify-center"
+        >
+          <img
+            src="/assets/ic-chevron-right.svg"
+            alt=""
+            width={10}
+            height={14}
+            draggable={false}
+            className={`transition-transform ${mapOpen ? "rotate-180" : ""}`}
+          />
+        </button>
       </div>
       <p className="flex w-full min-h-8 flex-col justify-center text-[12px] leading-4 text-[#666]">
         <span className="block w-full overflow-hidden text-ellipsis whitespace-nowrap">
@@ -88,12 +116,14 @@ function DayCard({ slot }: { slot: WeatherSlot }) {
           <p className="text-center text-[14px] leading-4 font-bold text-[#111]">
             {slot.display}
           </p>
-          <span className="flex items-center gap-0.5 text-[12px] leading-4 text-[#0066be]">
+          <span className="flex items-center gap-[3px] text-[12px] leading-4 text-[#0066be]">
             <img
               src="/assets/weather-drop.svg"
               alt=""
+              width={6}
+              height={9}
               draggable={false}
-              className="h-2.5 w-auto shrink-0"
+              className="shrink-0"
             />
             {precip}
           </span>
@@ -125,6 +155,15 @@ export function WeatherGadgetV2({
 }) {
   const now = weather.slots.find((slot) => slot.kind === "now");
   const days = weather.slots.filter((slot) => slot.kind === "day");
+  const [mapOpen, setMapOpen] = useState(false);
+  const [mapReady, setMapReady] = useState(false);
+
+  function toggleMap() {
+    setMapOpen((open) => {
+      if (!open) setMapReady(true);
+      return !open;
+    });
+  }
 
   return (
     <section className="mt-3.5">
@@ -137,8 +176,31 @@ export function WeatherGadgetV2({
               icon={now?.icon ?? "/assets/weather-now.svg"}
               tempC={weather.nowC}
               highlight={weather.highlightV2}
+              mapOpen={mapOpen}
               onOpenCity={onOpenCity}
+              onToggleMap={toggleMap}
             />
+            <div
+              className={`mt-4 shrink-0 overflow-hidden rounded-lg transition-[width,opacity] duration-300 ease-out ${
+                mapOpen ? "w-[196px] opacity-100" : "w-0 opacity-0"
+              }`}
+            >
+              {mapReady ? (
+                <div className="relative h-[98px] w-[196px] overflow-hidden rounded-lg">
+                  <WeatherMapBackdrop
+                    lat={weather.lat}
+                    lon={weather.lon}
+                    width={196}
+                    height={98}
+                    cityX={0.48}
+                    cityY={0.5}
+                    zoom={7}
+                    dim={false}
+                    className="pointer-events-none absolute inset-0 overflow-hidden bg-[#dce4ec]"
+                  />
+                </div>
+              ) : null}
+            </div>
             <div className="flex shrink-0 items-start gap-4">
               {days.map((slot, index) => (
                 <DayCard key={`${slot.label}-${index}`} slot={slot} />

@@ -160,11 +160,14 @@ export function WeatherGadget({
                 }`}
               >
                 {slot.wide ? (
-                  <span className="flex items-center gap-0.5">
+                  <span className="flex items-center gap-[3px]">
                     <img
                       src="/assets/weather-drop.svg"
                       alt=""
+                      width={6}
+                      height={9}
                       draggable={false}
+                      className="shrink-0"
                     />
                     {slot.display}
                   </span>

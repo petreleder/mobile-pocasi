@@ -28,30 +28,38 @@ function lat2tile(lat: number, zoom: number) {
   );
 }
 
-function basemapFor(lat: number, lon: number) {
-  const originX = lon2tile(lon, BASE_ZOOM) * TILE - VIEW_W * CITY_X;
-  const originY = lat2tile(lat, BASE_ZOOM) * TILE - VIEW_H * CITY_Y;
+function basemapFor(
+  lat: number,
+  lon: number,
+  viewW: number,
+  viewH: number,
+  cityX: number,
+  cityY: number,
+  baseZoom: number,
+) {
+  const originX = lon2tile(lon, baseZoom) * TILE - viewW * cityX;
+  const originY = lat2tile(lat, baseZoom) * TILE - viewH * cityY;
   const x0 = Math.floor(originX / TILE);
   const y0 = Math.floor(originY / TILE);
-  const x1 = Math.floor((originX + VIEW_W - 1) / TILE);
-  const y1 = Math.floor((originY + VIEW_H - 1) / TILE);
+  const x1 = Math.floor((originX + viewW - 1) / TILE);
+  const y1 = Math.floor((originY + viewH - 1) / TILE);
   const tiles: { key: string; src: string; left: number; top: number }[] = [];
   for (let ty = y0; ty <= y1; ty++) {
     for (let tx = x0; tx <= x1; tx++) {
       tiles.push({
         key: `${tx}-${ty}`,
-        src: `https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/${BASE_ZOOM}/${ty}/${tx}`,
+        src: `https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/${baseZoom}/${ty}/${tx}`,
         left: tx * TILE - originX,
         top: ty * TILE - originY,
       });
     }
   }
-  const radarDisplay = RADAR_SIZE * 2 ** (BASE_ZOOM - RADAR_ZOOM);
+  const radarDisplay = RADAR_SIZE * 2 ** (baseZoom - RADAR_ZOOM);
   const radarStyle: CSSProperties = {
     width: radarDisplay,
     height: radarDisplay,
-    left: lon2tile(lon, BASE_ZOOM) * TILE - originX - radarDisplay / 2,
-    top: lat2tile(lat, BASE_ZOOM) * TILE - originY - radarDisplay / 2,
+    left: lon2tile(lon, baseZoom) * TILE - originX - radarDisplay / 2,
+    top: lat2tile(lat, baseZoom) * TILE - originY - radarDisplay / 2,
   };
   return { tiles, radarStyle };
 }
@@ -64,8 +72,31 @@ type RadarApi = {
   };
 };
 
-export function WeatherMapBackdrop({ lat, lon }: { lat: number; lon: number }) {
-  const { tiles, radarStyle } = useMemo(() => basemapFor(lat, lon), [lat, lon]);
+export function WeatherMapBackdrop({
+  lat,
+  lon,
+  width = VIEW_W,
+  height = VIEW_H,
+  cityX = CITY_X,
+  cityY = CITY_Y,
+  zoom = BASE_ZOOM,
+  dim = true,
+  className = "pointer-events-none absolute inset-0 overflow-hidden bg-[#dce4ec]",
+}: {
+  lat: number;
+  lon: number;
+  width?: number;
+  height?: number;
+  cityX?: number;
+  cityY?: number;
+  zoom?: number;
+  dim?: boolean;
+  className?: string;
+}) {
+  const { tiles, radarStyle } = useMemo(
+    () => basemapFor(lat, lon, width, height, cityX, cityY, zoom),
+    [lat, lon, width, height, cityX, cityY, zoom],
+  );
   const [frames, setFrames] = useState<string[]>([]);
   const [index, setIndex] = useState(0);
   const [failed, setFailed] = useState(false);
@@ -114,10 +145,7 @@ export function WeatherMapBackdrop({ lat, lon }: { lat: number; lon: number }) {
   }, [frames, index]);
 
   return (
-    <div
-      className="pointer-events-none absolute inset-0 overflow-hidden bg-[#dce4ec]"
-      aria-hidden
-    >
+    <div className={className} aria-hidden>
       {failed ? (
         <iframe
           title=""
@@ -166,13 +194,15 @@ export function WeatherMapBackdrop({ lat, lon }: { lat: number; lon: number }) {
           ))}
         </>
       )}
-      <div
-        className="absolute inset-0"
-        style={{
-          backgroundImage:
-            "linear-gradient(90deg, rgb(0, 0, 0) 0%, rgba(0, 0, 0, 0.35) 42%, rgba(0, 0, 0, 0) 72%)",
-        }}
-      />
+      {dim ? (
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage:
+              "linear-gradient(90deg, rgb(0, 0, 0) 0%, rgba(0, 0, 0, 0.35) 42%, rgba(0, 0, 0, 0) 72%)",
+          }}
+        />
+      ) : null}
     </div>
   );
 }

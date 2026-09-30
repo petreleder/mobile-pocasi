@@ -25,7 +25,7 @@ function WeatherIcon({ src }: { src: string }) {
     <span className="relative flex size-9 items-center justify-center overflow-visible">
       <WeatherAnimIcon
         src={src}
-        className="size-9 max-w-none shrink-0 object-contain"
+        className="pointer-events-none absolute top-1/2 left-1/2 size-10 max-w-none -translate-x-1/2 -translate-y-1/2 object-contain"
       />
     </span>
   );

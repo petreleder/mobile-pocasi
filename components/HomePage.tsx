@@ -14,6 +14,7 @@ import { WeatherGadgetV3 } from "./WeatherGadgetV3";
 import { cityFromId, type City } from "@/lib/cities";
 import { rememberCity, storedCityId } from "@/lib/city-preference";
 import type { NameDayInfo } from "@/lib/nameday";
+import type { NewsTeaserInfo } from "@/lib/seznam-news";
 import type { WeatherInfo } from "@/lib/weather";
 import {
   lastWeatherHref,
@@ -30,11 +31,13 @@ export function HomePage({
   weatherVersion = "pocasi-1",
   nameday,
   weather,
+  news,
 }: {
   variant?: ServiceId;
   weatherVersion?: WeatherVersion;
   nameday: NameDayInfo;
   weather: WeatherInfo;
+  news: NewsTeaserInfo;
 }) {
   const [weatherHref, setWeatherHref] = useState(
     WEATHER_HREF[weatherVersion],
@@ -119,7 +122,7 @@ export function HomePage({
           {...nameday}
           className={variant === "weather" ? "mt-6" : "mt-4"}
         />
-        <NewsTeaser />
+        <NewsTeaser news={news} />
         <CitySheet
           open={pickerOpen}
           selectedId={currentWeather.cityId}

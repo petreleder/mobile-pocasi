@@ -92,12 +92,14 @@ function DayCard({ slot }: { slot: WeatherSlot }) {
           <p className="text-center text-[14px] leading-4 font-bold text-[#111]">
             {slot.display}
           </p>
-          <span className="flex items-center gap-0.5 text-[12px] leading-4 text-[#0066be]">
+          <span className="flex items-center gap-[3px] text-[12px] leading-4 text-[#0066be]">
             <img
               src="/assets/weather-drop.svg"
               alt=""
+              width={6}
+              height={9}
               draggable={false}
-              className="h-2.5 w-auto shrink-0"
+              className="shrink-0"
             />
             {precip}
           </span>

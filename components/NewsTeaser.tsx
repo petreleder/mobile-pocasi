@@ -1,4 +1,6 @@
-export function NewsTeaser() {
+import type { NewsTeaserInfo } from "@/lib/seznam-news";
+
+export function NewsTeaser({ news }: { news: NewsTeaserInfo }) {
   return (
     <section className="mt-1 px-4 pb-16">
       <div className="relative h-[27px] w-full">
@@ -21,9 +23,9 @@ export function NewsTeaser() {
         />
         <div className="absolute right-0 bottom-0 left-0 h-px bg-[#ffae01]" />
       </div>
-      <article className="flex flex-col">
+      <a href={news.href} className="flex flex-col text-inherit no-underline">
         <img
-          src="/assets/article-cover.png"
+          src={news.image}
           alt=""
           width={343}
           height={193}
@@ -31,13 +33,12 @@ export function NewsTeaser() {
         />
         <div className="h-1.5" />
         <h3 className="text-[16px] leading-[21px] font-bold text-[#c00]">
-          Je tu prudké zdražování. Důvod? Češi málo utrácejí
+          {news.title}
         </h3>
-        <p className="mt-0 text-[14px] leading-[19px] text-[#666]">
-          Klobásy a alkohol. Dvě položky, jejichž ceny vzrostly nejvíc. Zdražila
-          ale i leektřina a další náklady na...
+        <p className="mt-0 line-clamp-2 text-[14px] leading-[19px] text-[#666]">
+          {news.perex}
         </p>
-      </article>
+      </a>
     </section>
   );
 }
