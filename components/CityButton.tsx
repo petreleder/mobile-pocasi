@@ -40,9 +40,11 @@ export function CityButton({
         event.stopPropagation();
         onOpen();
       }}
-      className={`inline-flex max-w-full items-center gap-0.5 bg-transparent p-0 ${
-        className ?? ""
-      }`}
+      className={`${
+        chevron === "none"
+          ? "inline max-w-full"
+          : "inline-flex max-w-full items-center gap-0.5"
+      } bg-transparent p-0 ${className ?? ""}`}
     >
       <span className="truncate">{name}</span>
       {chevron === "none" ? null : (

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { SwipeRow } from "./SwipeRow";
 import { WeatherAnimIcon } from "./WeatherAnimIcon";
 
-export type ServiceId = "email" | "weather";
+export type ServiceId = "kratce" | "email" | "weather";
 
 type Service = {
   id: string;
@@ -80,6 +80,20 @@ function ScaledIcon({ src, size }: { src: string; size: 32 | 36 }) {
   );
 }
 
+function KratceIcon() {
+  return (
+    <span className="flex size-9 items-center justify-center rounded-full border border-white bg-[#888]">
+      <img
+        src="/assets/icon-kratce.svg"
+        alt=""
+        width={20}
+        height={20}
+        draggable={false}
+      />
+    </span>
+  );
+}
+
 function DenikyIcon() {
   const scale = 36 / 44;
   return (
@@ -118,14 +132,20 @@ function DenikyIcon() {
 
 const services: Service[] = [
   {
+    id: "kratce",
+    label: "Krátce",
+    href: "/",
+    renderIcon: () => <KratceIcon />,
+  },
+  {
     id: "email",
     label: "Email",
-    href: "/",
+    href: "/email",
     renderIcon: () => <CircleIcon src="/assets/icon-email.svg" />,
   },
   {
     id: "weather",
-    href: "/pocasi",
+    href: "/pocasi-2",
     renderIcon: () => <WeatherIcon src="/assets/weather-now.svg" />,
   },
   {
@@ -192,25 +212,28 @@ const services: Service[] = [
   },
 ];
 
-function itemClass(active: boolean, isWeather: boolean) {
+function itemClass(active: boolean, id: string) {
+  if (active && id === "kratce") return "font-bold text-[#111]";
   if (active) return "font-bold text-[#c00]";
-  if (isWeather) return "text-[#767676]";
+  if (id === "weather") return "text-[#767676]";
   return "text-[#888]";
 }
 
 export function ServiceCarousel({
-  activeId = "email",
-  weatherHref = "/pocasi",
+  activeId = "kratce",
+  weatherHref = "/pocasi-2",
   weatherLabel = "–",
   weatherIcon = "/assets/weather-now.svg",
+  className = "mt-3",
 }: {
   activeId?: ServiceId;
   weatherHref?: string;
   weatherLabel?: string;
   weatherIcon?: string;
+  className?: string;
 }) {
   return (
-    <SwipeRow className="mt-8 scroll-pl-4">
+    <SwipeRow className={`${className} scroll-pl-4`}>
       <div className="flex shrink-0 items-start gap-4 pr-4 pl-4">
       {services.map((service) => {
         const active = service.id === activeId;
@@ -235,7 +258,7 @@ export function ServiceCarousel({
             <span
               className={`text-[12px] leading-[1.3] whitespace-nowrap ${itemClass(
                 active,
-                service.id === "weather",
+                service.id,
               )}`}
             >
               {label}

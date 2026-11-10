@@ -8,6 +8,7 @@ import { NameDay } from "./NameDay";
 import { NewsTeaser } from "./NewsTeaser";
 import { SearchBar } from "./SearchBar";
 import { ServiceCarousel, type ServiceId } from "./ServiceCarousel";
+import { TopicCards } from "./TopicCards";
 import { WeatherGadget } from "./WeatherGadget";
 import { WeatherGadgetV2 } from "./WeatherGadgetV2";
 import { WeatherGadgetV3 } from "./WeatherGadgetV3";
@@ -15,6 +16,7 @@ import { cityFromId, type City } from "@/lib/cities";
 import { rememberCity, storedCityId } from "@/lib/city-preference";
 import type { NameDayInfo } from "@/lib/nameday";
 import type { NewsTeaserInfo } from "@/lib/seznam-news";
+import type { TopicCard } from "@/lib/seznam-topics";
 import type { WeatherInfo } from "@/lib/weather";
 import {
   lastWeatherHref,
@@ -27,17 +29,21 @@ import {
 export type { WeatherVersion };
 
 export function HomePage({
-  variant = "email",
-  weatherVersion = "pocasi-1",
+  variant = "kratce",
+  weatherVersion = "pocasi-2",
   nameday,
   weather,
   news,
+  novinky,
+  topics = [],
 }: {
   variant?: ServiceId;
   weatherVersion?: WeatherVersion;
   nameday: NameDayInfo;
   weather: WeatherInfo;
   news: NewsTeaserInfo;
+  novinky: NewsTeaserInfo;
+  topics?: TopicCard[];
 }) {
   const [weatherHref, setWeatherHref] = useState(
     WEATHER_HREF[weatherVersion],
@@ -93,11 +99,31 @@ export function HomePage({
     onOpenCity: () => setPickerOpen(true),
   };
 
+  const newsBlocks = (
+    <div className="mt-6 flex flex-col gap-6 px-4 pb-16">
+      <NewsTeaser
+        news={novinky}
+        brand={{ title: "Novinky", favicon: "/assets/favicon-novinky.png" }}
+      />
+      <NewsTeaser
+        news={news}
+        brand={{
+          title: "Seznam Zprávy",
+          favicon: "/assets/favicon-sz.png",
+        }}
+      />
+    </div>
+  );
+
   return (
-    <div className="flex min-h-dvh justify-center bg-white">
-      <div id="home-screen" className="w-full max-w-[393px] min-h-dvh bg-white">
+    <div className="flex min-h-dvh justify-center bg-white min-[481px]:bg-[#ececec] min-[481px]:py-8">
+      <div
+        id="home-screen"
+        className="no-scrollbar min-h-dvh w-full bg-white min-[481px]:h-[812px] min-[481px]:w-[375px] min-[481px]:min-h-0 min-[481px]:shrink-0 min-[481px]:overflow-y-auto min-[481px]:border min-[481px]:border-[#c6c6c6]"
+      >
         <Header />
         <SearchBar />
+        <NameDay {...nameday} className="mt-10" />
         <ServiceCarousel
           activeId={variant}
           weatherHref={weatherHref}
@@ -107,7 +133,12 @@ export function HomePage({
             "/assets/weather-now.svg"
           }
         />
-        {variant === "weather" ? (
+        {variant === "kratce" ? (
+          <div className="mt-3">
+            <div className="h-px w-full bg-[#ffae00]" />
+            <TopicCards topics={topics} />
+          </div>
+        ) : variant === "weather" ? (
           weatherVersion === "pocasi-3" ? (
             <WeatherGadgetV3 {...gadgetProps} />
           ) : weatherVersion === "pocasi-2" ? (
@@ -118,11 +149,7 @@ export function HomePage({
         ) : (
           <EmailGadget />
         )}
-        <NameDay
-          {...nameday}
-          className={variant === "weather" ? "mt-6" : "mt-4"}
-        />
-        <NewsTeaser news={news} />
+        {newsBlocks}
         <CitySheet
           open={pickerOpen}
           selectedId={currentWeather.cityId}

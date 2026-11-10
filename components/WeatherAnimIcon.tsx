@@ -20,7 +20,7 @@ export function WeatherAnimIcon({
 
   return (
     <span className={`block overflow-hidden ${className ?? ""}`}>
-      <LottieSvg src={src} autoplay loop className="block size-full" />
+      <LottieSvg src={src} autoplay loop={false} className="block size-full" />
     </span>
   );
 }
