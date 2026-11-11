@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { CitySheet } from "./CitySheet";
 import { EmailGadget } from "./EmailGadget";
 import { Header } from "./Header";
@@ -9,7 +9,6 @@ import { NewsTeaser } from "./NewsTeaser";
 import { SearchBar } from "./SearchBar";
 import { ServiceCarousel, type ServiceId } from "./ServiceCarousel";
 import { TopicCards } from "./TopicCards";
-import { TopicDetail, type CardOrigin } from "./TopicDetail";
 import { WeatherGadget } from "./WeatherGadget";
 import { WeatherGadgetV2 } from "./WeatherGadgetV2";
 import { WeatherGadgetV3 } from "./WeatherGadgetV3";
@@ -51,12 +50,6 @@ export function HomePage({
   );
   const [currentWeather, setCurrentWeather] = useState(weather);
   const [pickerOpen, setPickerOpen] = useState(false);
-  const [openTopic, setOpenTopic] = useState<TopicCard | null>(null);
-  const [topicOrigin, setTopicOrigin] = useState<CardOrigin | null>(null);
-  const closeTopic = useCallback(() => {
-    setOpenTopic(null);
-    setTopicOrigin(null);
-  }, []);
   const [cityBusy, setCityBusy] = useState(false);
 
   useEffect(() => {
@@ -126,9 +119,8 @@ export function HomePage({
     <div className="flex min-h-dvh justify-center bg-white min-[481px]:bg-[#ececec] min-[481px]:py-8">
       <div
         id="home-screen"
-        className="relative min-h-dvh w-full bg-white min-[481px]:h-[812px] min-[481px]:w-[375px] min-[481px]:min-h-0 min-[481px]:shrink-0 min-[481px]:overflow-hidden min-[481px]:border min-[481px]:border-[#c6c6c6]"
+        className="no-scrollbar min-h-dvh w-full bg-white min-[481px]:h-[812px] min-[481px]:w-[375px] min-[481px]:min-h-0 min-[481px]:shrink-0 min-[481px]:overflow-y-auto min-[481px]:border min-[481px]:border-[#c6c6c6]"
       >
-        <div className="no-scrollbar min-h-dvh w-full min-[481px]:h-full min-[481px]:overflow-y-auto">
         <Header />
         <SearchBar />
         <NameDay {...nameday} className="mt-10" />
@@ -144,13 +136,7 @@ export function HomePage({
         {variant === "kratce" ? (
           <div className="mt-3">
             <div className="h-px w-full bg-[#ffae00]" />
-            <TopicCards
-              topics={topics}
-              onOpen={(topic, origin) => {
-                setTopicOrigin(origin);
-                setOpenTopic(topic);
-              }}
-            />
+            <TopicCards topics={topics} />
           </div>
         ) : variant === "weather" ? (
           weatherVersion === "pocasi-3" ? (
@@ -171,15 +157,6 @@ export function HomePage({
           onClose={() => setPickerOpen(false)}
           onSelect={(city) => void applyCity(city)}
         />
-        </div>
-        {openTopic ? (
-          <TopicDetail
-            topics={topics}
-            topic={openTopic}
-            origin={topicOrigin}
-            onClose={closeTopic}
-          />
-        ) : null}
       </div>
     </div>
   );
