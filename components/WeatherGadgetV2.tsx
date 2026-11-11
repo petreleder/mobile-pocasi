@@ -1,6 +1,6 @@
 "use client";
 
-/** pocasi-2: no gadget header, Brno nyní on the first card, daily precip totals. */
+/** pocasi-2: city + wrapping forecast copy on the now card, daily precip totals. */
 
 import { useState } from "react";
 import { CityButton } from "./CityButton";
@@ -11,10 +11,27 @@ import { WeatherStripToggle } from "./WeatherStripToggle";
 import {
   HIGHLIGHT_THEMES_V2,
   dayPrecipLabel,
+  highlightSentence,
   type WeatherHighlight,
   type WeatherInfo,
   type WeatherSlot,
 } from "@/lib/weather";
+
+function CelsiusCopy({ text }: { text: string }) {
+  return (
+    <>
+      {text.split(/(\d+\s*°C)/g).map((part, index) =>
+        /^\d+\s*°C$/.test(part) ? (
+          <span key={index} className="whitespace-nowrap">
+            {part.replace(/(\d+)\s*°C/, "$1\u00a0°C")}
+          </span>
+        ) : (
+          part
+        ),
+      )}
+    </>
+  );
+}
 
 function NowCard({
   city,
@@ -36,30 +53,16 @@ function NowCard({
   const theme = HIGHLIGHT_THEMES_V2[highlight.mood];
   return (
     <div
-      className="flex h-[122px] w-[152px] shrink-0 snap-start flex-col items-start justify-center gap-0.5 pt-4 pr-2 pb-2 pl-5"
+      className="flex h-[120px] w-[180px] shrink-0 snap-start flex-col items-start justify-between pt-2.5 pr-0 pb-2 pl-5"
       style={{ backgroundImage: theme.background }}
     >
-      <p className="text-[12px] leading-4 whitespace-nowrap">
-        <CityButton
-          name={city}
-          onOpen={onOpenCity}
-          className="text-[#111]"
-          chevron="none"
-        />
-        <span className="text-[#666]"> nyní</span>
-      </p>
-      <div className="flex h-[46px] items-center gap-2.5">
-        <span className="relative size-10 shrink-0 overflow-visible">
-          <WeatherAnimIcon
-            src={icon}
-            className="pointer-events-none absolute top-1/2 left-1/2 size-[52px] max-w-none -translate-x-1/2 -translate-y-1/2 object-contain"
-          />
-        </span>
-        <div className="flex items-start">
-          <span className="text-center text-[26px] leading-8 font-bold text-[#111]">
+      <div className="flex items-center gap-2.5">
+        <WeatherAnimIcon src={icon} className="size-11 shrink-0 object-contain" />
+        <div className="flex items-start whitespace-nowrap">
+          <span className="text-center text-[28px] leading-8 font-bold text-[#111]">
             {tempC}
           </span>
-          <span className="text-center text-[12px] leading-[22px] text-[#111]">
+          <span className="pt-0.5 text-center text-[14px] leading-[18px] text-[#111]">
             °C
           </span>
         </div>
@@ -84,13 +87,13 @@ function NowCard({
           />
         </button>
       </div>
-      <p className="flex w-full min-h-8 flex-col justify-center text-[12px] leading-4 text-[#666]">
-        <span className="block w-full overflow-hidden text-ellipsis whitespace-nowrap">
-          {highlight.line1}
-        </span>
-        <span className="block w-full overflow-hidden text-ellipsis whitespace-nowrap">
-          {highlight.line2}
-        </span>
+      <p className="line-clamp-3 w-40 text-[14px] leading-[18px] text-[#888]">
+        <CityButton
+          name={city}
+          onOpen={onOpenCity}
+          className="font-bold text-[#111]"
+          chevron="none"
+        />{`, `}<CelsiusCopy text={highlightSentence(highlight)} />
       </p>
     </div>
   );
@@ -99,11 +102,11 @@ function NowCard({
 function DayCard({ slot }: { slot: WeatherSlot }) {
   const precip = dayPrecipLabel(slot.precipMm);
   return (
-    <div className="flex w-[60px] shrink-0 snap-start flex-col items-center gap-0.5 pt-4">
+    <div className="flex w-[60px] shrink-0 snap-start flex-col items-center gap-1 pt-4">
       <p className="text-center text-[12px] leading-4 whitespace-nowrap text-[#666]">
         {slot.label}
       </p>
-      <span className="relative flex h-[46px] w-10 items-center justify-center">
+      <span className="relative flex size-10 items-center justify-center">
         <img
           src={slot.icon}
           alt=""
@@ -113,7 +116,7 @@ function DayCard({ slot }: { slot: WeatherSlot }) {
       </span>
       {precip ? (
         <div className="flex flex-col items-center">
-          <p className="text-center text-[14px] leading-4 font-bold text-[#111]">
+          <p className="text-center text-[14px] leading-4 font-bold whitespace-nowrap text-[#111]">
             {slot.display}
           </p>
           <span className="flex items-center gap-[3px] text-[12px] leading-4 text-[#0066be]">
@@ -134,7 +137,7 @@ function DayCard({ slot }: { slot: WeatherSlot }) {
             {slot.display}
           </p>
           {slot.minC !== undefined ? (
-            <p className="text-center text-[12px] leading-4 whitespace-nowrap text-[#666]">
+            <p className="text-center text-[12px] leading-4 whitespace-nowrap text-[#888]">
               {slot.minC}°C
             </p>
           ) : null}
@@ -170,7 +173,7 @@ export function WeatherGadgetV2({
       <WeatherStripToggle href={toggleHref}>
         <div className="h-px w-full bg-[#ffae00]" />
         <SwipeRow>
-          <div className="flex shrink-0 items-start gap-2 pr-4">
+          <div className="flex shrink-0 items-start gap-4 pr-4">
             <NowCard
               city={weather.city}
               icon={now?.icon ?? "/assets/weather-now.svg"}

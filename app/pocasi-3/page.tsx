@@ -2,7 +2,7 @@ import { HomePage } from "@/components/HomePage";
 import { loadHome } from "@/lib/load-home";
 
 export default async function WeatherV3Page() {
-  const { nameday, weather, news } = await loadHome();
+  const { nameday, weather, news, novinky } = await loadHome();
   return (
     <HomePage
       variant="weather"
@@ -10,6 +10,7 @@ export default async function WeatherV3Page() {
       nameday={nameday}
       weather={weather}
       news={news}
+      novinky={novinky}
     />
   );
 }

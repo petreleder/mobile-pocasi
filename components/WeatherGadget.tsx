@@ -63,7 +63,7 @@ function NowCard({
 
 export function WeatherGadget({
   weather,
-  toggleHref = "/pocasi-2",
+  toggleHref = "/pocasi-3",
   onOpenCity,
 }: {
   weather: WeatherInfo;

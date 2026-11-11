@@ -122,7 +122,7 @@ function DayCard({ slot }: { slot: WeatherSlot }) {
 
 export function WeatherGadgetV3({
   weather,
-  toggleHref = "/pocasi",
+  toggleHref = "/pocasi-2",
   onOpenCity,
 }: {
   weather: WeatherInfo;

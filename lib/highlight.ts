@@ -43,7 +43,7 @@ export const HIGHLIGHT_THEMES_V2: Record<WeatherMood, { background: string }> =
   {
     sun: {
       background:
-        "radial-gradient(110% 100% at 0% 0%, rgb(247, 237, 210) 0%, rgb(255, 255, 255) 78%)",
+        "radial-gradient(210.52px 120px at 0px 0px, #f9f3e2 0%, #fff 100%)",
     },
     cloud: {
       background:
@@ -166,8 +166,8 @@ function skyKind(stats: DayStats) {
 function tempSpan(stats: DayStats) {
   const min = roundC(stats.minC);
   const max = roundC(stats.maxC);
-  if (min === max) return `${max} °C`;
-  return `${min} až ${max} °C`;
+  if (min === max) return `${max}\u00a0°C`;
+  return `${min} až ${max}\u00a0°C`;
 }
 
 function todayLines(stats: DayStats): Pick<WeatherHighlight, "line1" | "line2"> {
@@ -246,11 +246,11 @@ function eveningLines(
     sky === "storm" ? `${span}, bouřky a déšť` : "",
     precip >= 1 ? `${span}, déšť ${precip} mm` : "",
     tomorrowWet ? `${span}, bude pršet` : "",
-    warmer && sky === "sun" ? `slunečno, až ${tomorrowMax} °C` : "",
+    warmer && sky === "sun" ? `slunečno, až ${tomorrowMax}\u00a0°C` : "",
     colder ? `${span}, spíš zataženo` : "",
     sky === "overcast" ? `zataženo, ${span}` : "",
     sky === "partly" ? `polojasno, ${span}` : "",
-    sky === "sun" ? `slunečno, až ${tomorrowMax} °C` : "",
+    sky === "sun" ? `slunečno, až ${tomorrowMax}\u00a0°C` : "",
     `${span}, bez deště`,
   );
 
@@ -267,4 +267,14 @@ export function buildDayHighlightV2(
       ? eveningLines(today, ctx.tomorrow)
       : todayLines(today);
   return { mood, ...lines };
+}
+
+/** Body after "Brno, " — lowercase lead so it reads as one sentence. */
+export function highlightSentence(highlight: WeatherHighlight): string {
+  const line1 = highlight.line1.trim();
+  const line2 = highlight.line2.trim();
+  const lowered = line1
+    ? line1.charAt(0).toLocaleLowerCase("cs-CZ") + line1.slice(1)
+    : "";
+  return [lowered, line2].filter(Boolean).join(" ");
 }
