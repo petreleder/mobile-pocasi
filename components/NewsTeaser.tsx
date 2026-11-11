@@ -1,25 +1,19 @@
 import type { NewsTeaserInfo } from "@/lib/seznam-news";
 
-export function NewsTeaser({
-  news,
-  brand,
-}: {
-  news: NewsTeaserInfo;
-  brand: { title: string; favicon: string };
-}) {
+export function NewsTeaser({ news }: { news: NewsTeaserInfo }) {
   return (
-    <section>
+    <section className="mt-1 px-4 pb-16">
       <div className="relative h-[27px] w-full">
         <div className="flex items-center gap-1 pt-[3px]">
           <img
-            src={brand.favicon}
+            src="/assets/favicon-sz.png"
             alt=""
             width={16}
             height={16}
             className="size-4 object-cover"
           />
           <h2 className="text-[14px] leading-5 font-bold text-[#111]">
-            {brand.title}
+            Seznam Zprávy
           </h2>
         </div>
         <img
@@ -45,22 +39,6 @@ export function NewsTeaser({
           {news.perex}
         </p>
       </a>
-      {news.more.length > 0 ? (
-        <>
-          <div className="h-[5px]" />
-          <div className="flex w-full flex-col gap-[5px]">
-            {news.more.map((article) => (
-              <a
-                key={`${article.href}-${article.title}`}
-                href={article.href}
-                className="line-clamp-2 w-full text-[14px] leading-[19px] font-normal text-[#c00] no-underline"
-              >
-                {article.title}
-              </a>
-            ))}
-          </div>
-        </>
-      ) : null}
     </section>
   );
 }

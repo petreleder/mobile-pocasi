@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Seznam.cz",
-  description: "Klasické hledání — krátce",
+  description: "Klasické hledání — e-mail",
 };
 
 export const viewport: Viewport = {

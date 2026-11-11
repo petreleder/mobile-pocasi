@@ -30,11 +30,7 @@ export type WeatherInfo = {
 };
 
 export type { WeatherHighlight, WeatherMood } from "./highlight";
-export {
-  HIGHLIGHT_THEMES,
-  HIGHLIGHT_THEMES_V2,
-  highlightSentence,
-} from "./highlight";
+export { HIGHLIGHT_THEMES, HIGHLIGHT_THEMES_V2 } from "./highlight";
 
 export function dayPrecipLabel(mm: number | undefined): string | null {
   if (mm === undefined || mm < 0.2) return null;
