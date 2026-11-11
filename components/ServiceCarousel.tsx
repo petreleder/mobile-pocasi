@@ -61,22 +61,16 @@ function TransitIcon() {
   );
 }
 
-function ScaledIcon({ src, size }: { src: string; size: 32 | 36 }) {
-  const native = 44;
-  const scale = size / native;
+function ScaledIcon({ src }: { src: string }) {
   return (
-    <span
-      className="relative overflow-hidden"
-      style={{ width: size, height: size }}
-    >
-      <img
-        src={src}
-        alt=""
-        draggable={false}
-        className="absolute top-0 left-0 origin-top-left"
-        style={{ transform: `scale(${scale})` }}
-      />
-    </span>
+    <img
+      src={src}
+      alt=""
+      width={36}
+      height={36}
+      draggable={false}
+      className="size-9 max-w-none shrink-0"
+    />
   );
 }
 
@@ -95,15 +89,15 @@ function KratceIcon() {
 }
 
 function DenikyIcon() {
-  const scale = 36 / 44;
   return (
     <span className="relative size-9 overflow-hidden">
       <img
         src="/assets/icon-deniky.svg"
         alt=""
+        width={36}
+        height={36}
         draggable={false}
-        className="absolute top-0 left-0 origin-top-left"
-        style={{ transform: `scale(${scale})` }}
+        className="size-9 max-w-none"
       />
       <span
         className="absolute overflow-hidden"
@@ -181,29 +175,29 @@ const services: Service[] = [
   {
     id: "slovnik",
     label: "Slovník",
-    renderIcon: () => <ScaledIcon src="/assets/icon-slovnik.svg" size={36} />,
+    renderIcon: () => <ScaledIcon src="/assets/icon-slovnik.svg" />,
   },
   {
     id: "reality",
     label: "Reality",
-    renderIcon: () => <ScaledIcon src="/assets/icon-reality.svg" size={36} />,
+    renderIcon: () => <ScaledIcon src="/assets/icon-reality.svg" />,
   },
   {
     id: "letaky",
     label: "Letáky",
-    renderIcon: () => <ScaledIcon src="/assets/icon-kupi.svg" size={36} />,
+    renderIcon: () => <ScaledIcon src="/assets/icon-kupi.svg" />,
   },
   {
     id: "apps",
     label: "Mobilní aplikace",
     renderIcon: () => (
-      <ScaledIcon src="/assets/icon-tvprogram-v2.svg" size={36} />
+      <ScaledIcon src="/assets/icon-tvprogram-v2.svg" />
     ),
   },
   {
     id: "recepty",
     label: "Recepty",
-    renderIcon: () => <ScaledIcon src="/assets/icon-recepty.svg" size={36} />,
+    renderIcon: () => <ScaledIcon src="/assets/icon-recepty.svg" />,
   },
   {
     id: "deniky",
@@ -213,7 +207,6 @@ const services: Service[] = [
 ];
 
 function itemClass(active: boolean, id: string) {
-  if (active && id === "kratce") return "font-bold text-[#111]";
   if (active) return "font-bold text-[#c00]";
   if (id === "weather") return "text-[#767676]";
   return "text-[#888]";

@@ -1,17 +1,49 @@
 import { SwipeRow } from "./SwipeRow";
+import type { CardOrigin } from "./TopicDetail";
 import type { TopicCard } from "@/lib/seznam-topics";
 
-export function TopicCards({ topics }: { topics: TopicCard[] }) {
+export function originFrom(card: HTMLElement): CardOrigin {
+  const cardRect = card.getBoundingClientRect();
+  const desktop = window.matchMedia("(min-width: 481px)").matches;
+  if (!desktop) {
+    return {
+      top: cardRect.top,
+      left: cardRect.left,
+      width: cardRect.width,
+      height: cardRect.height,
+    };
+  }
+  const frame = document.getElementById("home-screen");
+  const frameRect = frame?.getBoundingClientRect();
+  const borderTop = frame ? parseFloat(getComputedStyle(frame).borderTopWidth) || 0 : 0;
+  const borderLeft = frame ? parseFloat(getComputedStyle(frame).borderLeftWidth) || 0 : 0;
+  return {
+    top: cardRect.top - (frameRect?.top ?? 0) - borderTop,
+    left: cardRect.left - (frameRect?.left ?? 0) - borderLeft,
+    width: cardRect.width,
+    height: cardRect.height,
+  };
+}
+
+export function TopicCards({
+  topics,
+  onOpen,
+}: {
+  topics: TopicCard[];
+  onOpen: (topic: TopicCard, origin: CardOrigin) => void;
+}) {
   if (topics.length === 0) return null;
 
   return (
     <SwipeRow className="mt-2 scroll-pl-4">
       <div className="flex shrink-0 items-start gap-1.5 pr-4 pl-4">
         {topics.map((topic) => (
-          <a
+          <button
             key={topic.id}
-            href={topic.href}
-            className="relative flex h-[156px] w-[88px] shrink-0 snap-start flex-col justify-end overflow-hidden rounded-lg px-2 pb-1.5 no-underline"
+            type="button"
+            data-topic-id={topic.id}
+            onClick={(event) => onOpen(topic, originFrom(event.currentTarget))}
+            className="relative flex h-[156px] w-[88px] shrink-0 snap-start flex-col justify-end overflow-hidden rounded-lg px-2 pb-1.5 text-left"
           >
             <img
               src={topic.image}
@@ -34,7 +66,7 @@ export function TopicCards({ topics }: { topics: TopicCard[] }) {
             <span className="relative line-clamp-4 text-[11px] leading-[1.2] font-bold text-white">
               {topic.title}
             </span>
-          </a>
+          </button>
         ))}
       </div>
     </SwipeRow>

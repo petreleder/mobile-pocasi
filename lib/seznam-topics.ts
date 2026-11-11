@@ -1,6 +1,7 @@
 export type TopicCard = {
   id: string;
   title: string;
+  summary: string;
   image: string;
   href: string;
   kind: "topic" | "video";
@@ -13,6 +14,8 @@ export const FALLBACK_TOPICS: TopicCard[] = [
   {
     id: "fallback-mak",
     title: "Obří vlčí mák z lidí vytvořil rekord",
+    summary:
+      "V Kyjově na Hodonínsku padl nový český rekord: 2 178 lidí vytvořilo z červených a černých balónků obří živý vlčí mák, symbol válečných veteránů, a vzdalo jim tak poctu. Rekord bude zapsán v České knize rekordů",
     image: "/assets/article-cover.png",
     href: HOME,
     kind: "topic",
@@ -20,6 +23,8 @@ export const FALLBACK_TOPICS: TopicCard[] = [
   {
     id: "fallback-media",
     title: "Protesty za média: tisíce v ulicích",
+    summary:
+      "Tisíce lidí vyšly do ulic na podporu nezávislých médií. Shrnutí tématu se načte z hlavní stránky Seznamu.",
     image: "/assets/article-cover.png",
     href: HOME,
     kind: "topic",
@@ -27,6 +32,8 @@ export const FALLBACK_TOPICS: TopicCard[] = [
   {
     id: "fallback-pocasi",
     title: "Brno 7 °C, za dvě hodiny bude pršet",
+    summary:
+      "V Brně bude za dvě hodiny pršet. Aktuální teplota je 7 °C.",
     image: "/assets/article-cover.png",
     href: HOME,
     kind: "topic",
@@ -35,6 +42,7 @@ export const FALLBACK_TOPICS: TopicCard[] = [
 
 type TrendingItem = {
   text?: string;
+  summary?: string;
   imageUrl?: string;
   url?: string;
 };
@@ -78,6 +86,7 @@ function toCard(item: TrendingItem, index: number): TopicCard | null {
   return {
     id: `${index}-${title}`,
     title,
+    summary: item.summary?.replace(/<[^>]+>/g, "").trim() ?? "",
     image,
     href: item.url?.trim() || HOME,
     kind: "topic",
