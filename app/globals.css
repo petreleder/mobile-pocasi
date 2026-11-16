@@ -20,3 +20,63 @@ body {
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
+@keyframes story-pan {
+  from {
+    object-position: 43% 50%;
+  }
+  to {
+    object-position: 57% 50%;
+  }
+}
+
+.story-photo {
+  object-position: 50% 50%;
+  animation: story-pan 18s ease-in-out infinite alternate;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .story-photo {
+    animation: none;
+  }
+}
+
+@keyframes listing-pan-x {
+  from {
+    object-position: 0% 50%;
+  }
+  to {
+    object-position: 100% 50%;
+  }
+}
+
+@keyframes listing-pan-y {
+  from {
+    object-position: 50% 0%;
+  }
+  to {
+    object-position: 50% 100%;
+  }
+}
+
+.listing-photo {
+  object-position: 0% 50%;
+}
+
+.listing-photo[data-axis="x"] {
+  animation: listing-pan-x var(--pan, 18s) ease-in-out infinite alternate;
+}
+
+.listing-photo[data-axis="y"] {
+  object-position: 50% 0%;
+  animation: listing-pan-y var(--pan, 18s) ease-in-out infinite alternate;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .listing-photo,
+  .listing-photo[data-axis="x"],
+  .listing-photo[data-axis="y"] {
+    animation: none;
+    object-position: 50% 50%;
+  }
+}

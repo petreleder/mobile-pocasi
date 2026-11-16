@@ -1,0 +1,10 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="slow_motion_video">
+<mask id="mask0_4658_34198" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="20" height="20">
+<rect id="Bounding box" width="20" height="20" fill="black"/>
+</mask>
+<g mask="url(#mask0_4658_34198)">
+<path id="slow_motion_video_2" d="M8.85417 12.9583L12.75 10.4792C12.9306 10.3681 13.0208 10.2083 13.0208 10C13.0208 9.79167 12.9306 9.63195 12.75 9.52083L8.85417 7.04167C8.65972 6.93056 8.46875 6.92708 8.28125 7.03125C8.09375 7.13542 8 7.29861 8 7.52083V12.4792C8 12.7014 8.09375 12.8646 8.28125 12.9688C8.46875 13.0729 8.65972 13.0694 8.85417 12.9583Z" fill="white"/>
+</g>
+</g>
+</svg>

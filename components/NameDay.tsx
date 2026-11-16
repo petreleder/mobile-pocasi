@@ -10,11 +10,13 @@ export function NameDay({
   className?: string;
 }) {
   return (
-    <p className={`${className} px-4 text-[14px] leading-5`}>
-      <span className="text-[#767676]">
-        {weekday}, {dateLabel}, svátek má{" "}
-      </span>
-      {name ? <span className="text-[#c00]">{name}.</span> : null}
+    <p className={`${className} text-center text-[12px] leading-5 text-[#888]`}>
+      {weekday} {dateLabel}, svátek má{" "}
+      {name ? (
+        <>
+          <span className="text-[#c00]">{name}</span>.
+        </>
+      ) : null}
     </p>
   );
 }

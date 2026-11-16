@@ -6,7 +6,6 @@ import { EmailGadget } from "./EmailGadget";
 import { Header } from "./Header";
 import { NameDay } from "./NameDay";
 import { NewsTeaser } from "./NewsTeaser";
-import { SearchBar } from "./SearchBar";
 import { ServiceCarousel, type ServiceId } from "./ServiceCarousel";
 import { TopicCards } from "./TopicCards";
 import { TopicDetail, type CardOrigin } from "./TopicDetail";
@@ -130,9 +129,9 @@ export function HomePage({
       >
         <div className="no-scrollbar min-h-dvh w-full min-[481px]:h-full min-[481px]:overflow-y-auto">
         <Header />
-        <SearchBar />
-        <NameDay {...nameday} className="mt-10" />
+        <NameDay {...nameday} className="mt-1.5" />
         <ServiceCarousel
+          className="mt-8"
           activeId={variant}
           weatherHref={weatherHref}
           weatherLabel={`${currentWeather.nowC}°C`}
@@ -140,9 +139,11 @@ export function HomePage({
             currentWeather.slots.find((slot) => slot.kind === "now")?.icon ??
             "/assets/weather-now.svg"
           }
+          videoSrc={topics.find((topic) => topic.video)?.video}
+          videoPoster={topics.find((topic) => topic.video)?.image}
         />
         {variant === "kratce" ? (
-          <div className="mt-3">
+          <div className="mt-3.5">
             <div className="h-px w-full bg-[#ffae00]" />
             <TopicCards
               topics={topics}

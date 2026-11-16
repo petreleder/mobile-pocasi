@@ -74,15 +74,51 @@ function ScaledIcon({ src }: { src: string }) {
   );
 }
 
-function KratceIcon() {
+function KratceIcon({
+  video,
+  poster,
+  playing,
+}: {
+  video?: string;
+  poster?: string;
+  playing?: boolean;
+}) {
   return (
-    <span className="flex size-9 items-center justify-center rounded-full border border-white bg-[#888]">
+    <span className="relative flex size-9 items-center justify-center overflow-hidden rounded-full">
+      {video && playing ? (
+        <video
+          src={video}
+          poster={poster}
+          muted
+          playsInline
+          autoPlay
+          onTimeUpdate={(event) => {
+            if (event.currentTarget.currentTime >= 5) {
+              event.currentTarget.currentTime = 0;
+            }
+          }}
+          className="absolute inset-0 size-full object-cover motion-reduce:hidden"
+        />
+      ) : null}
+      {poster ? (
+        <img
+          src={poster}
+          alt=""
+          draggable={false}
+          className={`absolute inset-0 size-full object-cover ${video && playing ? "motion-safe:hidden" : ""}`}
+        />
+      ) : null}
+      <span
+        aria-hidden
+        className="absolute inset-0 bg-[rgba(136,136,136,0.4)] backdrop-blur-[3.5px]"
+      />
       <img
         src="/assets/icon-kratce.svg"
         alt=""
         width={20}
         height={20}
         draggable={false}
+        className="relative"
       />
     </span>
   );
@@ -217,12 +253,16 @@ export function ServiceCarousel({
   weatherHref = "/pocasi-2",
   weatherLabel = "–",
   weatherIcon = "/assets/weather-now.svg",
+  videoSrc,
+  videoPoster,
   className = "mt-3",
 }: {
   activeId?: ServiceId;
   weatherHref?: string;
   weatherLabel?: string;
   weatherIcon?: string;
+  videoSrc?: string;
+  videoPoster?: string;
   className?: string;
 }) {
   return (
@@ -237,6 +277,12 @@ export function ServiceCarousel({
           service.id === "weather" ? (
             <WeatherIcon
               src={activeId === "weather" ? stillWeatherIcon(weatherIcon) : weatherIcon}
+            />
+          ) : service.id === "kratce" ? (
+            <KratceIcon
+              video={videoSrc}
+              poster={videoPoster}
+              playing={activeId !== "kratce"}
             />
           ) : (
             service.renderIcon()

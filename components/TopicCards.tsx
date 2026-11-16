@@ -37,7 +37,7 @@ export function TopicCards({
   return (
     <SwipeRow className="mt-2 scroll-pl-4">
       <div className="flex shrink-0 items-start gap-1.5 pr-4 pl-4">
-        {topics.map((topic) => (
+        {topics.map((topic, index) => (
           <button
             key={topic.id}
             type="button"
@@ -45,23 +45,54 @@ export function TopicCards({
             onClick={(event) => onOpen(topic, originFrom(event.currentTarget))}
             className="relative flex h-[156px] w-[88px] shrink-0 snap-start flex-col justify-end overflow-hidden rounded-lg px-2 pb-1.5 text-left"
           >
+            {topic.kind === "video" && topic.video && index === 0 ? (
+              <video
+                src={topic.video}
+                poster={topic.image}
+                muted
+                playsInline
+                autoPlay
+                onTimeUpdate={(event) => {
+                  if (event.currentTarget.currentTime >= 5) {
+                    event.currentTarget.currentTime = 0;
+                  }
+                }}
+                className="absolute inset-0 hidden h-full w-full object-cover motion-safe:block"
+              />
+            ) : null}
             <img
               src={topic.image}
               alt=""
-              className="absolute inset-0 h-full w-full object-cover"
+              className={`absolute inset-0 h-full w-full object-cover ${topic.kind === "video" && index === 0 ? "motion-safe:hidden" : ""}`}
             />
             <span
               aria-hidden
               className="absolute inset-0 bg-gradient-to-t from-black from-0% to-transparent to-[55%]"
             />
-            {topic.kind === "video" ? (
+            {topic.kind === "tip" && topic.authorImage ? (
               <img
-                src="/assets/icon-kratce.svg"
+                src={topic.authorImage}
                 alt=""
-                width={20}
-                height={20}
-                className="absolute top-2 left-2"
+                className="absolute top-1 left-1 size-5 rounded-full object-cover"
               />
+            ) : null}
+            {topic.kind === "video" ? (
+              <span className="absolute top-1 left-1 size-5">
+                <img
+                  src="/assets/icon-video-badge.svg"
+                  alt=""
+                  width={20}
+                  height={20}
+                  className="absolute inset-0 size-full max-w-none"
+                />
+                <img
+                  src="/assets/icon-slow-motion.svg"
+                  alt=""
+                  width={20}
+                  height={20}
+                  className="absolute inset-0 size-full max-w-none"
+                />
+              </span>
             ) : null}
             <span className="relative line-clamp-4 text-[11px] leading-[1.2] font-bold text-white">
               {topic.title}

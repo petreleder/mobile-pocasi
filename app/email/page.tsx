@@ -2,7 +2,7 @@ import { HomePage } from "@/components/HomePage";
 import { loadHome } from "@/lib/load-home";
 
 export default async function EmailPage() {
-  const { nameday, weather, news, novinky } = await loadHome();
+  const { nameday, weather, news, novinky, topics } = await loadHome();
   return (
     <HomePage
       variant="email"
@@ -10,6 +10,7 @@ export default async function EmailPage() {
       weather={weather}
       news={news}
       novinky={novinky}
+      topics={topics}
     />
   );
 }

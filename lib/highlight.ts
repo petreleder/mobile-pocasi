@@ -276,5 +276,31 @@ export function highlightSentence(highlight: WeatherHighlight): string {
   const lowered = line1
     ? line1.charAt(0).toLocaleLowerCase("cs-CZ") + line1.slice(1)
     : "";
+
+  const rainAmount = line2.match(/déšť\s+(\d+(?:[.,]\d+)?)\s*mm/i);
+  if (rainAmount) {
+    const amount = rainAmount[1].replace(".", ",");
+    const range = line2.match(/(\d+)\s+až\s+(\d+)\s*°C/);
+    const single = line2.match(/(\d+)\s*°C/);
+    const temps = range
+      ? `, teploty ${range[1]} až ${range[2]}\u00a0°C`
+      : single
+        ? `, teploty ${single[1]}\u00a0°C`
+        : "";
+    const rain = `déšť (${amount}\u00a0mm)`;
+    if (/(?:déšť|pršet)\s*$/i.test(lowered)) {
+      const condition = lowered
+        .replace(/,?\s*déšť\s*$/i, "")
+        .replace(/\s*bude pršet\s*$/i, "")
+        .replace(/,\s*$/, "")
+        .trim();
+      return condition ? `${condition}, ${rain}${temps}` : `${rain}${temps}`;
+    }
+    if (/přeháňky|bouřk|srážk|sněh/i.test(lowered)) {
+      return `${lowered} (${amount}\u00a0mm)${temps}`;
+    }
+    return lowered ? `${lowered}, ${rain}${temps}` : `${rain}${temps}`;
+  }
+
   return [lowered, line2].filter(Boolean).join(" ");
 }
